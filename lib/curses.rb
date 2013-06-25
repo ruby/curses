@@ -1,1 +1,1 @@
-require "curses/curses"
+require "curses.so"
