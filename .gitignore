@@ -1,8 +1,7 @@
-.??*.swp
-.bundle
-Gemfile.lock
-tags
-pkg
-coverage
-.yardoc
-doc
+*.rbc
+*.swp
+/TAGS
+/doc
+/lib/curses
+/pkg
+/tmp

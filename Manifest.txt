@@ -1,0 +1,16 @@
+BSDL
+COPYING
+History.md
+Manifest.txt
+README.md
+Rakefile
+curses.gemspec
+ext/curses/curses.c
+ext/curses/depend
+ext/curses/extconf.rb
+lib/curses.rb
+sample/hello.rb
+sample/mouse.rb
+sample/rain.rb
+sample/view.rb
+sample/view2.rb

@@ -1,8 +1,41 @@
-require "rake"
-require "rake/testtask"
-require "rubygems/package_task"
+# -*- ruby -*-
 
-require 'bundler'
-Bundler::GemHelper.install_tasks
+require 'rubygems'
+require 'hoe'
+begin
+  require 'rake/extensiontask'
+rescue LoadError => e
+  warn "\nmissing #{e.path} (for rake-compiler)" if e.respond_to? :path
+  warn "run: rake newb\n\n"
+end
 
-task :default => :build
+Hoe.plugin :git
+Hoe.plugin :minitest
+
+HOE = Hoe.spec 'curses' do
+  self.version = '1.0.0'
+
+  developer 'Eric Hodel', 'drbrain@segment7.net'
+  developer 'Shugo Maeda', ''
+
+  license 'Ruby'
+  license 'BSD-2-Clause'
+
+  self.extra_rdoc_files << 'ext/curses/curses.c'
+  self.spec_extras[:extensions] = 'ext/curses/extconf.rb'
+
+  self.readme_file  = 'README.md'
+  self.history_file = 'History.md'
+
+  self.extra_dev_deps << ['rake-compiler', '~> 0.8']
+end
+
+if Rake.const_defined? :ExtensionTask then
+  Rake::ExtensionTask.new 'curses', HOE.spec do |ext|
+    ext.lib_dir = 'lib/curses'
+  end
+
+  task default: :compile
+end
+
+# vim: syntax=ruby

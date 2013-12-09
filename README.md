@@ -1,12 +1,28 @@
-curses - Ruby binding for curses, ncurses, and PDCurses
-=======================================================
+# curses
 
-curses is an extension library for TUI applications.
-This library is extracted from the Ruby standard library.
+home: https://github.com/ruby/curses
+bugs: https://github.com/ruby/curses/issues
 
-Install
--------
+## Description
 
-```bash
-$ gem install curses
-```
+A Ruby binding for curses, ncurses, and PDCurses, formerly part of the Ruby
+standard library.   curses is an extension library for text UI applications.
+
+## Install
+
+    $ gem install curses
+
+## Developers
+
+After checking out the source, run:
+
+    $ rake newb
+
+This task will install any missing dependencies, run the tests/specs,
+and generate the RDoc.
+
+## License
+
+curses is released under the Ruby and 2-clause BSD licenses.  See COPYING for
+details.
+
