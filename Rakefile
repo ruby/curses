@@ -11,6 +11,7 @@ end
 
 Hoe.plugin :git
 Hoe.plugin :minitest
+Hoe.plugin :travis
 
 HOE = Hoe.spec 'curses' do
   self.version = '1.0.0'
@@ -36,6 +37,7 @@ if Rake.const_defined? :ExtensionTask then
   end
 
   task default: :compile
+  task test: :compile
 end
 
 # vim: syntax=ruby
