@@ -9,5 +9,5 @@ notifications:
   email:
   - drbrain@segment7.net
 rvm:
-- 2.0.0
+- ruby-head
 script: rake travis
