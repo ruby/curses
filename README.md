@@ -1,7 +1,7 @@
 # curses
 
-home: https://github.com/ruby/curses
-bugs: https://github.com/ruby/curses/issues
+* https://github.com/ruby/curses
+* https://github.com/ruby/curses/issues
 
 ## Description
 
