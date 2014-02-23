@@ -7,7 +7,6 @@ Gem::Specification.new { |s|
   s.email = "shugo@ruby-lang.org"
   s.homepage = "http://github.com/shugo/curses"
   s.platform = Gem::Platform::RUBY
-  s.required_ruby_version = '>= 2.1.0'
   s.summary = "curses binding for Ruby"
   s.files = Dir.glob('{lib,ext,sample}/**/*') + ['README.md', 'COPYING', 'BSDL']
   s.extensions = ["ext/curses/extconf.rb"]
