@@ -128,6 +128,15 @@ if header_library
   else
     warn "unexpeted value for --with-curses-version: #{with_curses_version}"
   end
-
-  create_makefile("curses")
+  
+  if RUBY_VERSION >= '2.1'
+    create_makefile("curses")
+  else
+    # curses is part of ruby-core pre-2.1.0, so this gem is not required. But
+    # make pre-2.1.0 a no-op rather than failing or listing as unsupported, to
+    # aid gems offering multi-version Ruby support.
+    File.open("Makefile", 'w') do |f|
+      f.puts dummy_makefile("curses").join
+    end
+  end
 end
