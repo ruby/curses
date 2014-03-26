@@ -7,6 +7,5 @@ Bug fixes:
 
 ### 1.0
 
-* Major enhancements
-  * Birthday!
+Birthday!
 
