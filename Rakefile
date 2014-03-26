@@ -32,9 +32,7 @@ HOE = Hoe.spec 'curses' do
 end
 
 if Rake.const_defined? :ExtensionTask then
-  Rake::ExtensionTask.new 'curses', HOE.spec do |ext|
-    ext.lib_dir = 'lib/curses'
-  end
+  Rake::ExtensionTask.new 'curses', HOE.spec
 
   task default: :compile
   task test: :compile

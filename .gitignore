@@ -2,6 +2,8 @@
 *.swp
 /TAGS
 /doc
-/lib/curses
+/lib/curses.bundle
+/lib/curses.so
+/lib/curses.dll
 /pkg
 /tmp
