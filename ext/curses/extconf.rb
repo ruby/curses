@@ -117,7 +117,7 @@ if header_library
       if [header, library].grep(/ncurses|pdcurses|xcurses/i)
         variable_p = false
       else
-        warn "found curses_version but cannot determin whether it is a"
+        warn "found curses_version but cannot determine whether it is a"
         warn "function or a variable, so assume a variable in old SVR4"
         warn "ncurses."
         function_p = false
@@ -126,7 +126,7 @@ if header_library
     $defs << '-DHAVE_FUNC_CURSES_VERSION' if function_p
     $defs << '-DHAVE_VAR_CURSES_VERSION' if variable_p
   else
-    warn "unexpeted value for --with-curses-version: #{with_curses_version}"
+    warn "unexpected value for --with-curses-version: #{with_curses_version}"
   end
   
   if RUBY_VERSION >= '2.1'
