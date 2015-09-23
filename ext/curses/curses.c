@@ -867,7 +867,8 @@ curses_setscrreg(VALUE obj, VALUE top, VALUE bottom)
  * Document-method: Curses.attroff
  * call-seq: attroff(attrs)
  *
- * Turns on the named attributes +attrs+ without affecting any others.
+ * Turns off the named attributes +attrs+
+ * without affecting any others.
  *
  * See also Curses::Window.attrset for additional information.
  */
@@ -883,7 +884,7 @@ curses_attroff(VALUE obj, VALUE attrs)
  * Document-method: Curses.attron
  * call-seq: attron(attrs)
  *
- * Turns off the named attributes +attrs+
+ * Turns on the named attributes +attrs+
  * without turning any other attributes on or off.
  *
  * See also Curses::Window.attrset for additional information.
@@ -2217,7 +2218,8 @@ window_scrl(VALUE obj, VALUE n)
  * Document-method: Curses::Window.attroff
  * call-seq: attroff(attrs)
  *
- * Turns on the named attributes +attrs+ without affecting any others.
+ * Turns off the named attributes +attrs+
+ * without affecting any others.
  *
  * See also Curses::Window.attrset
  */
@@ -2238,7 +2240,7 @@ window_attroff(VALUE obj, VALUE attrs)
  * Document-method: Curses::Window.attron
  * call-seq: attron(attrs)
  *
- * Turns off the named attributes +attrs+
+ * Turns on the named attributes +attrs+
  * without turning any other attributes on or off.
  *
  * See also Curses::Window.attrset
