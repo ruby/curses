@@ -2806,9 +2806,9 @@ Init_curses(void)
      *
      * == Usage
      *
-     *   require 'curses'
+     *   require "curses"
      *
-     *   Curses.init_screen()
+     *   Curses.init_screen
      *
      *   my_str = "LOOK! PONIES!"
      *   bwin = Curses::Window.new(10, (my_str.length + 10),

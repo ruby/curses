@@ -7,8 +7,8 @@ include Curses
 # main
 #
 
-if ARGV.size != 1 then
-  printf("usage: #{$0} file\n");
+unless ARGV.size == 1
+  puts "usage: #{$0} file"
   exit
 end
 begin
@@ -20,34 +20,31 @@ end
 # signal(SIGINT, finish)
 
 init_screen
-#keypad(stdscr, TRUE)
+#keypad(stdscr, true)
 nonl
 cbreak
 noecho
-#scrollok(stdscr, TRUE)
+#scrollok(stdscr, true)
 
 # slurp the file
 data_lines = []
-fp.each_line {|l|
-  data_lines.push(l)
-}
+fp.each_line {|l| data_lines.push(l) }
 fp.close
 
 
 lptr = 0
-while TRUE
-  i = 0
-  while i < lines
+loop do
+  lines.times do |i|
     setpos(i, 0)
     #clrtoeol
-    addstr(data_lines[lptr + i] || '')
-    i += 1
+    addstr(data_lines[lptr + i] || "")
   end
   refresh
 
-  explicit = FALSE
+  explicit = false
   n = 0
-  while TRUE
+  c = nil
+  loop do
     c = getch
     if c =~ /[0-9]/
       n = 10 * n + c.to_i
@@ -62,8 +59,8 @@ while TRUE
   case c
   when "n"  #when KEY_DOWN
     i = 0
-    while i < n
-      if lptr + lines < data_lines.size then
+    n.times do
+      if lptr + lines < data_lines.size
         lptr += 1
       else
         break
@@ -74,8 +71,8 @@ while TRUE
 
   when "p"  #when KEY_UP
     i = 0
-    while i < n
-      if lptr > 0 then
+    n.times do
+      if lptr > 0
         lptr -= 1
       else
         break

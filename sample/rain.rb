@@ -14,8 +14,8 @@ def ranf
 end
 
 # main #
-for i in %w[HUP INT QUIT TERM]
-  if trap(i, "SIG_IGN") != "IGNORE" then  # handler was "IGNORE"
+%w[HUP INT QUIT TERM].each do |i|
+  unless trap(i, "SIG_IGN") == "IGNORE"  # handler was "IGNORE"
     trap(i) {|sig| onsig(sig) }
   end
 end
@@ -30,13 +30,13 @@ xpos = {}
 ypos = {}
 r = lines - 4
 c = cols - 4
-for i in 0 .. 4
+(0..4).each do |i|
   xpos[i] = (c * ranf).to_i + 2
   ypos[i] = (r * ranf).to_i + 2
 end
 
 i = 0
-while TRUE
+loop do
   x = (c * ranf).to_i + 2
   y = (r * ranf).to_i + 2
 
