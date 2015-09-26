@@ -28,7 +28,7 @@ class FileViewer
     @screen = Curses.stdscr
 
     @screen.scrollok(true)
-    #$screen.keypad(true)
+    #@screen.keypad(true)
   end
 
   # Load the file into memory, and put
@@ -37,7 +37,7 @@ class FileViewer
     fp = open(filename, "r") do |fp|
            # slurp the file
            fp.each_line {|l|
-             @data_lines.push(l.chop)
+             @data_lines.push(l.chomp)
            }
          end
     @top = 0

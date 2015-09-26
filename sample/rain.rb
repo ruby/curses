@@ -15,7 +15,7 @@ end
 
 # main #
 for i in %w[HUP INT QUIT TERM]
-  if trap(i, "SIG_IGN") != 0 then  # 0 for SIG_IGN
+  if trap(i, "SIG_IGN") != "IGNORE" then  # handler was "IGNORE"
     trap(i) {|sig| onsig(sig) }
   end
 end
@@ -23,6 +23,7 @@ end
 init_screen
 nl
 noecho
+curs_set 0
 srand
 
 xpos = {}

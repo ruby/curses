@@ -24,7 +24,6 @@ begin
   refresh
   getch
   show_message("Hello, World!")
-  refresh
 ensure
   close_screen
 end

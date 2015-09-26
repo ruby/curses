@@ -8,13 +8,13 @@ include Curses
 #
 
 if ARGV.size != 1 then
-  printf("usage: view file\n");
+  printf("usage: #{$0} file\n");
   exit
 end
 begin
   fp = open(ARGV[0], "r")
 rescue
-  raise "cannot open file: #{ARGV[1]}"
+  raise "cannot open file: #{ARGV[0]}"
 end
 
 # signal(SIGINT, finish)
@@ -51,6 +51,7 @@ while TRUE
     c = getch
     if c =~ /[0-9]/
       n = 10 * n + c.to_i
+      explicit = true
     else
       break
     end

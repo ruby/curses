@@ -2822,7 +2822,7 @@ Init_curses(void)
      *   win.setpos(2, 3)
      *   win.addstr(my_str)
      *   # or even
-     *   win << "\nORLY"
+     *   win << "\nOH REALLY?"
      *   win << "\nYES!! " + my_str
      *   win.refresh
      *   win.getch
