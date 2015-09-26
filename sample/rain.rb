@@ -1,16 +1,15 @@
 #!/usr/bin/env ruby
 
 require "curses"
-include Curses
 
 def onsig(signal)
-  close_screen
+  Curses.close_screen
   exit signal
 end
 
 def place_string(y, x, string)
-  setpos(y, x)
-  addstr(string)
+  Curses.setpos(y, x)
+  Curses.addstr(string)
 end
 
 def cycle_index(index)
@@ -23,15 +22,15 @@ end
   end
 end
 
-init_screen
-nl
-noecho
-curs_set 0
+Curses.init_screen
+Curses.nl
+Curses.noecho
+Curses.curs_set 0
 srand
 
 xpos, ypos = {}, {}
-x_range = 2..(cols - 3)
-y_range = 2..(lines - 3)
+x_range = 2..(Curses.cols - 3)
+y_range = 2..(Curses.lines - 3)
 (0..4).each do |i|
   xpos[i], ypos[i] = rand(x_range), rand(y_range)
 end
@@ -68,6 +67,6 @@ loop do
 
   xpos[i], ypos[i] = x, y
 
-  refresh
+  Curses.refresh
   sleep(0.5)
 end
