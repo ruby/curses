@@ -6,7 +6,7 @@ include Curses
 def show_message(message)
   width = message.length + 6
   win = Window.new(5, width,
-		   (lines - 5) / 2, (cols - width) / 2)
+                   (lines - 5) / 2, (cols - width) / 2)
   win.box('|', '-')
   win.setpos(2, 3)
   win.addstr(message)

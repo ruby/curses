@@ -28,7 +28,7 @@ noecho
 
 # slurp the file
 data_lines = []
-fp.each_line { |l|
+fp.each_line {|l|
   data_lines.push(l)
 }
 fp.close
@@ -63,9 +63,9 @@ while TRUE
     i = 0
     while i < n
       if lptr + lines < data_lines.size then
-	lptr += 1
+        lptr += 1
       else
-	break
+        break
       end
       i += 1
     end
@@ -75,9 +75,9 @@ while TRUE
     i = 0
     while i < n
       if lptr > 0 then
-	lptr -= 1
+        lptr -= 1
       else
-	break
+        break
       end
       i += 1
     end
