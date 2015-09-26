@@ -3,10 +3,10 @@
 require "curses"
 
 
-# A curses based file viewer
+# A curses based file viewer.
 class FileViewer
 
-  # Create a new fileviewer, and view the file.
+  # Create a new FileViewer and view the file.
   def initialize(filename)
     @data_lines = []
     @screen = nil
@@ -16,10 +16,8 @@ class FileViewer
     interact
   end
 
-  # Perform the curses setup
+  # Perform the curses setup.
   def init_curses
-    # signal(SIGINT, finish)
-
     Curses.init_screen
     Curses.nonl
     Curses.cbreak
@@ -31,13 +29,10 @@ class FileViewer
     #@screen.keypad(true)
   end
 
-  # Load the file into memory, and put
-  # the first part on the curses display.
+  # Load the file into memory and
+  # put the first part on the curses display.
   def load_file(filename)
-    fp = open(filename, "r") do |fp|
-           # slurp the file
-           fp.each_line {|l| @data_lines.push(l.chomp) }
-         end
+    @data_lines = File.readlines(filename).map(&:chomp)
     @top = 0
     @data_lines[0..@screen.maxy-1].each_with_index do |line, idx|
       @screen.setpos(idx, 0)
@@ -50,7 +45,7 @@ class FileViewer
   end
 
 
-  # Scroll the display up by one line
+  # Scroll the display up by one line.
   def scroll_up
     if @top > 0
       @screen.scrl(-1)
@@ -66,7 +61,7 @@ class FileViewer
     end
   end
 
-  # Scroll the display down by one line
+  # Scroll the display down by one line.
   def scroll_down
     if @top + @screen.maxy < @data_lines.length
       @screen.scrl(1)
@@ -83,7 +78,7 @@ class FileViewer
   end
 
   # Allow the user to interact with the display.
-  # This uses EMACS-like keybindings, and also
+  # This uses Emacs-like keybindings, and also
   # vi-like keybindings as well, except that left
   # and right move to the beginning and end of the
   # file, respectively.

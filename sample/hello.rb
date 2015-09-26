@@ -4,9 +4,9 @@ require "curses"
 include Curses
 
 def show_message(message)
-  width = message.length + 6
-  win = Window.new(5, width,
-                   (lines - 5) / 2, (cols - width) / 2)
+  height, width = 5, message.length + 6
+  top, left = (lines - height) / 2, (cols - width) / 2
+  win = Window.new(height, width, top, left)
   win.box("|", "-")
   win.setpos(2, 3)
   win.addstr(message)
@@ -18,8 +18,7 @@ end
 init_screen
 begin
   crmode
-#  show_message("Hit any key")
-  setpos((lines - 5) / 2, (cols - 10) / 2)
+  setpos((lines - 1) / 2, (cols - 11) / 2)
   addstr("Hit any key")
   refresh
   getch

@@ -3,21 +3,16 @@
 require "curses"
 include Curses
 
-#
-# main
-#
-
 unless ARGV.size == 1
   puts "usage: #{$0} file"
   exit
 end
+
 begin
-  fp = open(ARGV[0], "r")
+  data_lines = File.readlines(ARGV[0])
 rescue
   raise "cannot open file: #{ARGV[0]}"
 end
-
-# signal(SIGINT, finish)
 
 init_screen
 #keypad(stdscr, true)
@@ -25,12 +20,6 @@ nonl
 cbreak
 noecho
 #scrollok(stdscr, true)
-
-# slurp the file
-data_lines = []
-fp.each_line {|l| data_lines.push(l) }
-fp.close
-
 
 lptr = 0
 loop do
@@ -68,7 +57,6 @@ loop do
       i += 1
     end
     #wscrl(i)
-
   when "p"  #when KEY_UP
     i = 0
     n.times do
@@ -80,10 +68,9 @@ loop do
       i += 1
     end
     #wscrl(-i)
-
   when "q"
     break
   end
-
 end
+
 close_screen
