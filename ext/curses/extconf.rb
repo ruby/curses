@@ -32,6 +32,7 @@ header_library = nil
 [
   ["ncurses.h", ["ncursesw", "ncurses"]],
   ["ncurses/curses.h", ["ncurses"]],
+  ["ncursesw/curses.h", ["ncursesw"]],
   ["curses_colr/curses.h", ["cur_colr"]],
   ["curses.h", ["curses", "pdcurses"]],
   # ["xcurses.h", ["XCurses"]], # XCurses (PDCurses for X11)
