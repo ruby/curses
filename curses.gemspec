@@ -1,7 +1,7 @@
 require 'rubygems'
 Gem::Specification.new { |s|
   s.name = "curses"
-  s.version = "0.0.2"
+  s.version = "1.0.2"
   s.author = "Shugo Maeda"
   s.email = "shugo@ruby-lang.org"
   s.homepage = "http://github.com/shugo/curses"

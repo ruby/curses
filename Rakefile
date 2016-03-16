@@ -14,7 +14,7 @@ Hoe.plugin :minitest
 Hoe.plugin :travis
 
 HOE = Hoe.spec 'curses' do
-  self.version = '1.0.1'
+  self.version = '1.0.2'
 
   developer 'Eric Hodel', 'drbrain@segment7.net'
   developer 'Shugo Maeda', ''
