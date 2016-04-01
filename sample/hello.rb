@@ -3,8 +3,10 @@
 require "curses"
 
 def show_message(message)
-  height, width = 5, message.length + 6
-  top, left = (Curses.lines - height) / 2, (Curses.cols - width) / 2
+  height = 5
+  width  = message.length + 6
+  top    = (Curses.lines - height) / 2
+  left   = (Curses.cols - width) / 2
   win = Curses::Window.new(height, width, top, left)
   win.box("|", "-")
   win.setpos(2, 3)
