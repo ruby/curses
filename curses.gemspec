@@ -5,7 +5,7 @@ Gem::Specification.new { |s|
   s.email = ["shugo@ruby-lang.org", 'drbrain@segment7.net']
   s.homepage = "https://github.com/ruby/curses"
   s.platform = Gem::Platform::RUBY
-  s.summary = "curses binding for Ruby"
+  s.summary = "A Ruby binding for curses, ncurses, and PDCurses. curses is an extension library for text UI applications. Formerly part of the Ruby standard library, [curses was removed and placed in this gem][1] with the release of Ruby 2.1.0. (see [ruby/ruby@9c5b2fd][2])"
   s.files = Dir.glob('{lib,ext,sample}/**/*') + ['README.md', 'COPYING', 'BSDL']
   s.extensions = ["ext/curses/extconf.rb"]
   s.require_path = "lib"
