@@ -7,3 +7,4 @@
 /lib/curses.dll
 /pkg
 /tmp
+/Gemfile.lock
