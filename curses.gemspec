@@ -9,6 +9,7 @@ Gem::Specification.new { |s|
   s.files = Dir.glob('{lib,ext,sample}/**/*') + ['README.md', 'COPYING', 'BSDL']
   s.extensions = ["ext/curses/extconf.rb"]
   s.require_path = "lib"
+  s.required_ruby_version = Gem::Requirement.new('>= 2.1.0')
   s.licenses = ['Ruby', 'BSD-2-Clause']
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'rake'
