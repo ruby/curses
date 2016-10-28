@@ -1,0 +1,18 @@
+---
+clone_depth: 10
+install:
+  - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
+  - appveyor DownloadFile http://dl.bintray.com/oneclick/OpenKnapsack/x64/pdcurses-3.4-x64-windows.tar.lzma
+  - 7z e openssl-1.0.1m-x64-windows.tar.lzma
+  - 7z x -y -oC:\Ruby%ruby_version% openssl-1.0.1m-x64-windows.tar
+  - bundle install
+build_script:
+  - rake -rdevkit compile -- --with-curses-dir=C:\Ruby%ruby_version%
+test_script:
+  - rake test
+deploy: off
+environment:
+  matrix:
+    - ruby_version: "21-x64"
+    - ruby_version: "22-x64"
+    - ruby_version: "23-x64"
