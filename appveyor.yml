@@ -8,8 +8,7 @@ install:
   - bundle install
 build_script:
   - rake -rdevkit compile -- --with-curses-dir=C:\Ruby%ruby_version%
-test_script:
-  - rake test
+test: off
 deploy: off
 environment:
   matrix:
