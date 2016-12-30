@@ -251,6 +251,19 @@ curses_clear(VALUE obj)
 }
 
 /*
+ * Document-method: Curses.erase
+ *
+ * Erase the screen.
+ */
+static VALUE
+curses_erase(VALUE obj)
+{
+    curses_stdscr();
+    werase(stdscr);
+    return Qnil;
+}
+
+/*
  * Document-method: Curses.clrtoeol
  *
  * Clears to the end of line, that the cursor is currently on.
@@ -1564,6 +1577,22 @@ window_clear(VALUE obj)
 }
 
 /*
+ * Document-method: Curses::Window.erase
+ *
+ * Erase the window.
+ */
+static VALUE
+window_erase(VALUE obj)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    werase(winp->window);
+
+    return Qnil;
+}
+
+/*
  * Document-method: Curses::Window.clrtoeol
  *
  * Clear the window to the end of line, that the cursor is currently on.
@@ -2709,6 +2738,7 @@ Init_curses(void)
     rb_define_module_function(mCurses, "refresh", curses_refresh, 0);
     rb_define_module_function(mCurses, "doupdate", curses_doupdate, 0);
     rb_define_module_function(mCurses, "clear", curses_clear, 0);
+    rb_define_module_function(mCurses, "erase", curses_erase, 0);
     rb_define_module_function(mCurses, "clrtoeol", curses_clrtoeol, 0);
     rb_define_module_function(mCurses, "echo", curses_echo, 0);
     rb_define_module_function(mCurses, "noecho", curses_noecho, 0);
@@ -2839,6 +2869,7 @@ Init_curses(void)
     rb_define_method(cWindow, "subwin", window_subwin, 4);
     rb_define_method(cWindow, "close", window_close, 0);
     rb_define_method(cWindow, "clear", window_clear, 0);
+    rb_define_method(cWindow, "erase", window_erase, 0);
     rb_define_method(cWindow, "clrtoeol", window_clrtoeol, 0);
     rb_define_method(cWindow, "refresh", window_refresh, 0);
     rb_define_method(cWindow, "noutrefresh", window_noutrefresh, 0);
