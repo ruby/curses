@@ -250,6 +250,7 @@ curses_clear(VALUE obj)
     return Qnil;
 }
 
+#ifdef HAVE_WERASE
 /*
  * Document-method: Curses.erase
  *
@@ -262,6 +263,9 @@ curses_erase(VALUE obj)
     werase(stdscr);
     return Qnil;
 }
+#else
+#define curses_erase rb_f_notimplement
+#endif
 
 /*
  * Document-method: Curses.clrtoeol
@@ -1576,6 +1580,7 @@ window_clear(VALUE obj)
     return Qnil;
 }
 
+#ifdef HAVE_WERASE
 /*
  * Document-method: Curses::Window.erase
  *
@@ -1591,6 +1596,9 @@ window_erase(VALUE obj)
 
     return Qnil;
 }
+#else
+#define curses_erase rb_f_notimplement
+#endif
 
 /*
  * Document-method: Curses::Window.clrtoeol

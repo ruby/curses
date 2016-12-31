@@ -59,7 +59,7 @@ if header_library
               getbkgd getnstr init isendwin keyname keypad resizeterm
               scrl set setscrreg ungetch
               wattroff wattron wattrset wbkgd wbkgdset wdeleteln wgetnstr
-              wresize wscrl wsetscrreg
+              wresize wscrl wsetscrreg werase
               def_prog_mode reset_prog_mode timeout wtimeout nodelay
               init_color wcolor_set use_default_colors newpad)
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
