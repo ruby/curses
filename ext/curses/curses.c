@@ -1656,6 +1656,26 @@ window_noutrefresh(VALUE obj)
     return Qnil;
 }
 
+#ifdef HAVE_REDRAWWIN
+/*
+ * Document-method: Curses::Window.redraw
+ *
+ * Dedraws the entire window.
+ */
+static VALUE
+window_redraw(VALUE obj)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    redrawwin(winp->window);
+
+    return Qnil;
+}
+#else
+#define window_redraw rb_f_notimplement
+#endif
+
 /*
  * Document-method: Curses::Window.move
  * call-seq: move(y,x)
@@ -2881,6 +2901,7 @@ Init_curses(void)
     rb_define_method(cWindow, "clrtoeol", window_clrtoeol, 0);
     rb_define_method(cWindow, "refresh", window_refresh, 0);
     rb_define_method(cWindow, "noutrefresh", window_noutrefresh, 0);
+    rb_define_method(cWindow, "redraw", window_redraw, 0);
     rb_define_method(cWindow, "box", window_box, -1);
     rb_define_method(cWindow, "move", window_move, 2);
     rb_define_method(cWindow, "setpos", window_setpos, 2);
