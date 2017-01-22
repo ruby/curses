@@ -2690,26 +2690,25 @@ pad_noutrefresh(VALUE obj, VALUE pminrow, VALUE pmincol, VALUE sminrow,
  * the next call to Curses.get_char etc.
  *
  * There is just one input queue for all windows.
- *
- * For function keys, Curses.ungetch should be used instead of this method,
- * because their value may conflict with Unicode codepoints.
  */
 static VALUE
 curses_unget_char(VALUE obj, VALUE ch)
 {
-    wchar_t c;
+    int c;
+    wchar_t wc;
     ID id_ord;
 
     curses_stdscr();
     if (FIXNUM_P(ch)) {
 	c = NUM2UINT(ch);
+	ungetch(c);
     }
     else {
 	StringValue(ch);
 	CONST_ID(id_ord, "ord");
-	c = NUM2UINT(rb_funcall(ch, id_ord, 0));
+	wc = NUM2UINT(rb_funcall(ch, id_ord, 0));
+	unget_wch(wc);
     }
-    unget_wch(c);
     return Qnil;
 }
 #else
