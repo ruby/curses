@@ -2681,6 +2681,139 @@ pad_noutrefresh(VALUE obj, VALUE pminrow, VALUE pmincol, VALUE sminrow,
 }
 #endif /* HAVE_NEWPAD */
 
+#ifdef HAVE_UNGET_WCH
+/*
+ * Document-method: Curses.unget_char
+ * call-seq: unget_char(ch)
+ *
+ * Places +ch+ back onto the input queue to be returned by
+ * the next call to Curses.get_char etc.
+ *
+ * There is just one input queue for all windows.
+ *
+ * For function keys, Curses.ungetch should be used instead of this method,
+ * because their value may conflict with Unicode codepoints.
+ */
+static VALUE
+curses_unget_char(VALUE obj, VALUE ch)
+{
+    wchar_t c;
+    ID id_ord;
+
+    curses_stdscr();
+    if (FIXNUM_P(ch)) {
+	c = NUM2UINT(ch);
+    }
+    else {
+	StringValue(ch);
+	CONST_ID(id_ord, "ord");
+	c = NUM2UINT(rb_funcall(ch, id_ord, 0));
+    }
+    unget_wch(c);
+    return Qnil;
+}
+#else
+#define curses_unget_char rb_f_notimplement
+#endif
+
+#ifdef HAVE_GET_WCH
+static VALUE
+uint_chr(unsigned int ch)
+{
+    return rb_enc_uint_chr(ch, rb_default_external_encoding());
+}
+
+struct get_wch_arg {
+    int retval;
+    wint_t ch;
+};
+
+static void *
+get_wch_func(void *_arg)
+{
+    struct get_wch_arg *arg = (struct get_wch_arg *) _arg;
+    arg->retval = get_wch(&arg->ch);
+    return 0;
+}
+
+/*
+ * Document-method: Curses.get_char
+ *
+ * Read and returns a character or function key from the window.
+ * A single or multibyte character is represented by a String, and
+ * a function key is represented by an Integer.
+ * Returns nil if no input is ready.
+ *
+ * See Curses::Key to all the function KEY_* available
+ *
+ */
+static VALUE
+curses_get_char(VALUE obj)
+{
+    struct get_wch_arg arg;
+
+    curses_stdscr();
+    rb_thread_call_without_gvl(get_wch_func, &arg, RUBY_UBF_IO, 0);
+    switch (arg.retval) {
+    case OK:
+	return uint_chr(arg.ch);
+    case KEY_CODE_YES:
+	return UINT2NUM(arg.ch);
+    }
+    return Qnil;
+}
+#else
+#define curses_get_char rb_f_notimplement
+#endif
+
+
+#ifdef HAVE_WGET_WCH
+struct wget_wch_arg {
+    WINDOW *win;
+    int retval;
+    wint_t ch;
+};
+
+static void *
+wget_wch_func(void *_arg)
+{
+    struct wget_wch_arg *arg = (struct wget_wch_arg *) _arg;
+    arg->retval = wget_wch(arg->win, &arg->ch);
+    return 0;
+}
+
+/*
+ * Document-method: Curses::Window.get_char
+ *
+ * Read and returns a character or function key from the window.
+ * A single or multibyte character is represented by a String, and
+ * a function key is represented by an Integer.
+ * Returns nil if no input is ready.
+ *
+ * See Curses::Key to all the function KEY_* available
+ *
+ */
+static VALUE
+window_get_char(VALUE obj)
+{
+    struct windata *winp;
+    struct wget_wch_arg arg;
+
+    GetWINDOW(obj, winp);
+    arg.win = winp->window;
+    rb_thread_call_without_gvl(wget_wch_func, &arg, RUBY_UBF_IO, 0);
+    switch (arg.retval) {
+    case OK:
+	return uint_chr(arg.ch);
+    case KEY_CODE_YES:
+	return UINT2NUM(arg.ch);
+    }
+    return Qnil;
+}
+#else
+#define window_get_char rb_f_notimplement
+#endif
+
 /*------------------------- Initialization -------------------------*/
 
 /*
@@ -2830,6 +2963,8 @@ Init_curses(void)
     rb_define_module_function(mCurses, "timeout=", curses_timeout, 1);
     rb_define_module_function(mCurses, "def_prog_mode", curses_def_prog_mode, 0);
     rb_define_module_function(mCurses, "reset_prog_mode", curses_reset_prog_mode, 0);
+    rb_define_module_function(mCurses, "get_char", curses_get_char, 0);
+    rb_define_module_function(mCurses, "unget_char", curses_unget_char, 1);
 
     {
         VALUE version;
@@ -2944,6 +3079,8 @@ Init_curses(void)
 
     rb_define_method(cWindow, "nodelay=", window_nodelay, 1);
     rb_define_method(cWindow, "timeout=", window_timeout, 1);
+
+    rb_define_method(cWindow, "get_char", window_get_char, 0);
 
 #ifdef HAVE_NEWPAD
     /*
