@@ -3003,23 +3003,23 @@ Init_curses(void)
      *
      * == Usage
      *
-     *   require 'curses'
+     *   require "curses"
      *
-     *   Curses.init_screen()
+     *   Curses.init_screen
      *
      *   my_str = "LOOK! PONIES!"
-     *   bwin = Curses::Window.new( 10, (my_str.length + 10),
-     *                             (Curses.lines - 10) / 2,
-     *                             (Curses.cols - (my_str.length + 10)) / 2 )
+     *
+     *   height, width = 12, my_str.length + 10
+     *   top, left = (Curses.lines - height) / 2, (Curses.cols - width) / 2
+     *   bwin = Curses::Window.new(height, width, top, left)
      *   bwin.box("\\", "/")
      *   bwin.refresh
-     *   win = bwin.subwin( 6, my_str.length + 6,
-     *                     (Curses.lines - 6) / 2,
-     *                     (Curses.cols - (my_str.length + 6)) / 2 )
-     *   win.setpos(2,3)
+     *
+     *   win = bwin.subwin(height - 4, width - 4, top + 2, left + 2)
+     *   win.setpos(2, 3)
      *   win.addstr(my_str)
      *   # or even
-     *   win << "\nORLY"
+     *   win << "\nOH REALLY?"
      *   win << "\nYES!! " + my_str
      *   win.refresh
      *   win.getch

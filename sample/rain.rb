@@ -1,76 +1,72 @@
 #!/usr/bin/env ruby
-# rain for a curses test
 
 require "curses"
-include Curses
 
-def onsig(sig)
-  close_screen
-  exit sig
+def onsig(signal)
+  Curses.close_screen
+  exit signal
 end
 
-def ranf
-  rand(32767).to_f / 32767
+def place_string(y, x, string)
+  Curses.setpos(y, x)
+  Curses.addstr(string)
 end
 
-# main #
-for i in %w[HUP INT QUIT TERM]
-  if trap(i, "SIG_IGN") != 0 then  # 0 for SIG_IGN
-    trap(i) {|sig| onsig(sig) }
+def cycle_index(index)
+  (index + 1) % 5
+end
+
+%w[HUP INT QUIT TERM].each do |sig|
+  unless trap(sig, "IGNORE") == "IGNORE"  # previous handler
+    trap(sig) {|s| onsig(s) }
   end
 end
 
-init_screen
-nl
-noecho
+Curses.init_screen
+Curses.nl
+Curses.noecho
+Curses.curs_set 0
 srand
 
-xpos = {}
-ypos = {}
-r = lines - 4
-c = cols - 4
-for i in 0 .. 4
-  xpos[i] = (c * ranf).to_i + 2
-  ypos[i] = (r * ranf).to_i + 2
+xpos, ypos = {}, {}
+x_range = 2..(Curses.cols - 3)
+y_range = 2..(Curses.lines - 3)
+(0..4).each do |i|
+  xpos[i], ypos[i] = rand(x_range), rand(y_range)
 end
 
 i = 0
-while TRUE
-  x = (c * ranf).to_i + 2
-  y = (r * ranf).to_i + 2
+loop do
+  x, y = rand(x_range), rand(y_range)
 
+  place_string(y, x, ".")
 
-  setpos(y, x); addstr(".")
+  place_string(ypos[i], xpos[i], "o")
 
-  setpos(ypos[i], xpos[i]); addstr("o")
+  i = cycle_index(i)
+  place_string(ypos[i], xpos[i], "O")
 
-  i = if i == 0 then 4 else i - 1 end
-  setpos(ypos[i], xpos[i]); addstr("O")
+  i = cycle_index(i)
+  place_string(ypos[i] - 1, xpos[i],      "-")
+  place_string(ypos[i],     xpos[i] - 1, "|.|")
+  place_string(ypos[i] + 1, xpos[i],      "-")
 
-  i = if i == 0 then 4 else i - 1 end
-  setpos(ypos[i] - 1, xpos[i]);      addstr("-")
-  setpos(ypos[i],     xpos[i] - 1); addstr("|.|")
-  setpos(ypos[i] + 1, xpos[i]);      addstr("-")
+  i = cycle_index(i)
+  place_string(ypos[i] - 2, xpos[i],       "-")
+  place_string(ypos[i] - 1, xpos[i] - 1,  "/ \\")
+  place_string(ypos[i],     xpos[i] - 2, "| O |")
+  place_string(ypos[i] + 1, xpos[i] - 1, "\\ /")
+  place_string(ypos[i] + 2, xpos[i],       "-")
 
-  i = if i == 0 then 4 else i - 1 end
-  setpos(ypos[i] - 2, xpos[i]);       addstr("-")
-  setpos(ypos[i] - 1, xpos[i] - 1);  addstr("/ \\")
-  setpos(ypos[i],     xpos[i] - 2); addstr("| O |")
-  setpos(ypos[i] + 1, xpos[i] - 1); addstr("\\ /")
-  setpos(ypos[i] + 2, xpos[i]);       addstr("-")
+  i = cycle_index(i)
+  place_string(ypos[i] - 2, xpos[i],       " ")
+  place_string(ypos[i] - 1, xpos[i] - 1,  "   ")
+  place_string(ypos[i],     xpos[i] - 2, "     ")
+  place_string(ypos[i] + 1, xpos[i] - 1,  "   ")
+  place_string(ypos[i] + 2, xpos[i],       " ")
 
-  i = if i == 0 then 4 else i - 1 end
-  setpos(ypos[i] - 2, xpos[i]);       addstr(" ")
-  setpos(ypos[i] - 1, xpos[i] - 1);  addstr("   ")
-  setpos(ypos[i],     xpos[i] - 2); addstr("     ")
-  setpos(ypos[i] + 1, xpos[i] - 1);  addstr("   ")
-  setpos(ypos[i] + 2, xpos[i]);       addstr(" ")
+  xpos[i], ypos[i] = x, y
 
-
-  xpos[i] = x
-  ypos[i] = y
-  refresh
+  Curses.refresh
   sleep(0.5)
 end
-
-# end of main

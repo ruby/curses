@@ -1,13 +1,14 @@
 #!/usr/bin/env ruby
 
 require "curses"
-include Curses
 
 def show_message(message)
-  width = message.length + 6
-  win = Window.new(5, width,
-		   (lines - 5) / 2, (cols - width) / 2)
-  win.box('|', '-')
+  height = 5
+  width  = message.length + 6
+  top    = (Curses.lines - height) / 2
+  left   = (Curses.cols - width) / 2
+  win = Curses::Window.new(height, width, top, left)
+  win.box("|", "-")
   win.setpos(2, 3)
   win.addstr(message)
   win.refresh
@@ -15,16 +16,14 @@ def show_message(message)
   win.close
 end
 
-init_screen
+Curses.init_screen
 begin
-  crmode
-#  show_message("Hit any key")
-  setpos((lines - 5) / 2, (cols - 10) / 2)
-  addstr("Hit any key")
-  refresh
-  getch
+  Curses.crmode
+  Curses.setpos((Curses.lines - 1) / 2, (Curses.cols - 11) / 2)
+  Curses.addstr("Hit any key")
+  Curses.refresh
+  Curses.getch
   show_message("Hello, World!")
-  refresh
 ensure
-  close_screen
+  Curses.close_screen
 end
