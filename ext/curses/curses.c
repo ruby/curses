@@ -2681,7 +2681,6 @@ pad_noutrefresh(VALUE obj, VALUE pminrow, VALUE pmincol, VALUE sminrow,
 }
 #endif /* HAVE_NEWPAD */
 
-#ifdef HAVE_UNGET_WCH
 /*
  * Document-method: Curses.unget_char
  * call-seq: unget_char(ch)
@@ -2694,34 +2693,33 @@ pad_noutrefresh(VALUE obj, VALUE pminrow, VALUE pmincol, VALUE sminrow,
 static VALUE
 curses_unget_char(VALUE obj, VALUE ch)
 {
-    int c;
-    wchar_t wc;
+#ifdef HAVE_UNGET_WCH
     ID id_ord;
+#endif
 
     curses_stdscr();
     if (FIXNUM_P(ch)) {
-	c = NUM2UINT(ch);
-	ungetch(c);
+	ungetch(NUM2UINT(ch));
     }
     else {
 	StringValue(ch);
+#ifdef HAVE_UNGET_WCH
 	CONST_ID(id_ord, "ord");
-	wc = NUM2UINT(rb_funcall(ch, id_ord, 0));
-	unget_wch(wc);
+	unget_wch(NUM2UINT(rb_funcall(ch, id_ord, 0)));
+#else
+	ungetch(NUM2UINT(ch));
+#endif
     }
     return Qnil;
 }
-#else
-#define curses_unget_char rb_f_notimplement
-#endif
 
-#ifdef HAVE_GET_WCH
 static VALUE
 uint_chr(unsigned int ch)
 {
     return rb_enc_uint_chr(ch, rb_default_external_encoding());
 }
 
+#ifdef HAVE_GET_WCH
 struct get_wch_arg {
     int retval;
     wint_t ch;
@@ -2734,6 +2732,7 @@ get_wch_func(void *_arg)
     arg->retval = get_wch(&arg->ch);
     return 0;
 }
+#endif
 
 /*
  * Document-method: Curses.get_char
@@ -2749,6 +2748,7 @@ get_wch_func(void *_arg)
 static VALUE
 curses_get_char(VALUE obj)
 {
+#ifdef HAVE_GET_WCH
     struct get_wch_arg arg;
 
     curses_stdscr();
@@ -2760,10 +2760,22 @@ curses_get_char(VALUE obj)
 	return UINT2NUM(arg.ch);
     }
     return Qnil;
-}
 #else
-#define curses_get_char rb_f_notimplement
+    int c;
+
+    curses_stdscr();
+    rb_thread_call_without_gvl(getch_func, &c, RUBY_UBF_IO, 0);
+    if (c > 0xff) {
+	return INT2NUM(c);
+    }
+    else if (c >= 0) {
+	return uint_chr(c);
+    }
+    else {
+	return Qnil;
+    }
 #endif
+}
 
 
 #ifdef HAVE_WGET_WCH
@@ -2780,6 +2792,7 @@ wget_wch_func(void *_arg)
     arg->retval = wget_wch(arg->win, &arg->ch);
     return 0;
 }
+#endif
 
 /*
  * Document-method: Curses::Window.get_char
@@ -2795,6 +2808,7 @@ wget_wch_func(void *_arg)
 static VALUE
 window_get_char(VALUE obj)
 {
+#ifdef HAVE_WGET_WCH
     struct windata *winp;
     struct wget_wch_arg arg;
 
@@ -2808,10 +2822,24 @@ window_get_char(VALUE obj)
 	return UINT2NUM(arg.ch);
     }
     return Qnil;
-}
 #else
-#define window_get_char rb_f_notimplement
+    struct windata *winp;
+    struct wgetch_arg arg;
+
+    GetWINDOW(obj, winp);
+    arg.win = winp->window;
+    rb_thread_call_without_gvl(wgetch_func, (void *)&arg, RUBY_UBF_IO, 0);
+    if (arg.c > 0xff) {
+	return INT2NUM(arg.c);
+    }
+    else if (arg.c >= 0) {
+	return uint_chr(arg.c);
+    }
+    else {
+	return Qnil;
+    }
 #endif
+}
 
 /*------------------------- Initialization -------------------------*/
 
