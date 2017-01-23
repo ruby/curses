@@ -20,12 +20,11 @@ with the release of Ruby 2.1.0. (see [ruby/ruby@9c5b2fd][2])
 
 ## Developers
 
-After checking out the source, run:
+After checking out the repo, run `bundle install` to install dependencies.
 
-    $ rake newb
+To compile the extension library, run `bundle exec rake compile`.
 
-This task will install any missing dependencies, run the tests/specs,
-and generate the RDoc.
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `curses.gemspec`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## License
 
