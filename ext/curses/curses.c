@@ -73,6 +73,8 @@ static VALUE cMouseEvent;
 
 static VALUE rb_stdscr;
 
+static rb_encoding *keyboard_encoding;
+
 struct windata {
     WINDOW *window;
 };
@@ -2682,6 +2684,31 @@ pad_noutrefresh(VALUE obj, VALUE pminrow, VALUE pmincol, VALUE sminrow,
 #endif /* HAVE_NEWPAD */
 
 /*
+ * Document-method: Curses.keyboard_encoding
+ * call-seq: Curses.keyboard_encoding
+ *
+ * Returns the encoding for keyboard input.
+ */
+static VALUE
+curses_get_keyboard_encoding(VALUE obj)
+{
+    return rb_enc_from_encoding(keyboard_encoding);
+}
+
+/*
+ * Document-method: Curses.keyboard_encoding=
+ * call-seq: Curses.keyboard_encoding = encoding
+ *
+ * Sets the encoding for keyboard input.
+ */
+static VALUE
+curses_set_keyboard_encoding(VALUE obj, VALUE enc)
+{
+    keyboard_encoding = rb_to_encoding(enc);
+    return enc;
+}
+
+/*
  * Document-method: Curses.unget_char
  * call-seq: unget_char(ch)
  *
@@ -2714,9 +2741,9 @@ curses_unget_char(VALUE obj, VALUE ch)
 }
 
 static VALUE
-uint_chr(unsigned int ch)
+keyboard_uint_chr(unsigned int ch)
 {
-    return rb_enc_uint_chr(ch, rb_locale_encoding());
+    return rb_enc_uint_chr(ch, keyboard_encoding);
 }
 
 #ifdef HAVE_GET_WCH
@@ -2755,7 +2782,7 @@ curses_get_char(VALUE obj)
     rb_thread_call_without_gvl(get_wch_func, &arg, RUBY_UBF_IO, 0);
     switch (arg.retval) {
     case OK:
-	return uint_chr(arg.ch);
+	return keyboard_uint_chr(arg.ch);
     case KEY_CODE_YES:
 	return UINT2NUM(arg.ch);
     }
@@ -2769,7 +2796,7 @@ curses_get_char(VALUE obj)
 	return INT2NUM(c);
     }
     else if (c >= 0) {
-	return uint_chr(c);
+	return keyboard_uint_chr(c);
     }
     else {
 	return Qnil;
@@ -2817,7 +2844,7 @@ window_get_char(VALUE obj)
     rb_thread_call_without_gvl(wget_wch_func, &arg, RUBY_UBF_IO, 0);
     switch (arg.retval) {
     case OK:
-	return uint_chr(arg.ch);
+	return keyboard_uint_chr(arg.ch);
     case KEY_CODE_YES:
 	return UINT2NUM(arg.ch);
     }
@@ -2833,7 +2860,7 @@ window_get_char(VALUE obj)
 	return INT2NUM(arg.c);
     }
     else if (arg.c >= 0) {
-	return uint_chr(arg.c);
+	return keyboard_uint_chr(arg.c);
     }
     else {
 	return Qnil;
@@ -2875,6 +2902,8 @@ window_get_char(VALUE obj)
 void
 Init_curses(void)
 {
+    keyboard_encoding = rb_locale_encoding();
+
     mCurses    = rb_define_module("Curses");
 
     /*
@@ -2990,8 +3019,10 @@ Init_curses(void)
     rb_define_module_function(mCurses, "timeout=", curses_timeout, 1);
     rb_define_module_function(mCurses, "def_prog_mode", curses_def_prog_mode, 0);
     rb_define_module_function(mCurses, "reset_prog_mode", curses_reset_prog_mode, 0);
-    rb_define_module_function(mCurses, "get_char", curses_get_char, 0);
+    rb_define_module_function(mCurses, "keyboard_encoding", curses_get_keyboard_encoding, 0);
+    rb_define_module_function(mCurses, "keyboard_encoding=", curses_set_keyboard_encoding, 1);
     rb_define_module_function(mCurses, "unget_char", curses_unget_char, 1);
+    rb_define_module_function(mCurses, "get_char", curses_get_char, 0);
 
     {
         VALUE version;
