@@ -2716,7 +2716,7 @@ curses_unget_char(VALUE obj, VALUE ch)
 static VALUE
 uint_chr(unsigned int ch)
 {
-    return rb_enc_uint_chr(ch, rb_default_external_encoding());
+    return rb_enc_uint_chr(ch, rb_locale_encoding());
 }
 
 #ifdef HAVE_GET_WCH
