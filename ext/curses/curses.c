@@ -74,6 +74,7 @@ static VALUE cMouseEvent;
 static VALUE rb_stdscr;
 
 static rb_encoding *keyboard_encoding;
+static rb_encoding *terminal_encoding;
 
 struct windata {
     WINDOW *window;
@@ -647,7 +648,7 @@ static VALUE
 curses_addstr(VALUE obj, VALUE str)
 {
     StringValue(str);
-    str = rb_str_export_locale(str);
+    str = rb_str_export_to_enc(str, terminal_encoding);
     curses_stdscr();
     if (!NIL_P(str)) {
 	addstr(StringValueCStr(str));
@@ -682,7 +683,7 @@ curses_getch(VALUE obj)
     if (rb_isprint(c)) {
 	char ch = (char)c;
 
-	return rb_locale_str_new(&ch, 1);
+	return rb_external_str_new_with_enc(&ch, 1, keyboard_encoding);
     }
     return UINT2NUM(c);
 }
@@ -715,7 +716,7 @@ curses_getstr(VALUE obj)
 
     curses_stdscr();
     rb_thread_call_without_gvl(getstr_func, rtn, RUBY_UBF_IO, 0);
-    return rb_locale_str_new_cstr(rtn);
+    return rb_external_str_new_with_enc(rtn, strlen(rtn), keyboard_encoding);
 }
 
 /*
@@ -1981,7 +1982,7 @@ window_addstr(VALUE obj, VALUE str)
 	struct windata *winp;
 
 	StringValue(str);
-	str = rb_str_export_locale(str);
+	str = rb_str_export_to_enc(str, terminal_encoding);
 	GetWINDOW(obj, winp);
 	waddstr(winp->window, StringValueCStr(str));
     }
@@ -2041,7 +2042,7 @@ window_getch(VALUE obj)
     if (rb_isprint(c)) {
 	char ch = (char)c;
 
-	return rb_locale_str_new(&ch, 1);
+	return rb_external_str_new_with_enc(&ch, 1, keyboard_encoding);
     }
     return UINT2NUM(c);
 }
@@ -2078,7 +2079,8 @@ window_getstr(VALUE obj)
     GetWINDOW(obj, winp);
     arg.win = winp->window;
     rb_thread_call_without_gvl(wgetstr_func, (void *)&arg, RUBY_UBF_IO, 0);
-    return rb_locale_str_new_cstr(arg.rtn);
+    return rb_external_str_new_with_enc(arg.rtn, strlen(arg.rtn),
+				       	keyboard_encoding);
 }
 
 /*
@@ -2709,6 +2711,31 @@ curses_set_keyboard_encoding(VALUE obj, VALUE enc)
 }
 
 /*
+ * Document-method: Curses.terminal_encoding
+ * call-seq: Curses.terminal_encoding
+ *
+ * Returns the encoding for terminal output.
+ */
+static VALUE
+curses_get_terminal_encoding(VALUE obj)
+{
+    return rb_enc_from_encoding(terminal_encoding);
+}
+
+/*
+ * Document-method: Curses.terminal_encoding=
+ * call-seq: Curses.terminal_encoding = encoding
+ *
+ * Sets the encoding for terminal output.
+ */
+static VALUE
+curses_set_terminal_encoding(VALUE obj, VALUE enc)
+{
+    terminal_encoding = rb_to_encoding(enc);
+    return enc;
+}
+
+/*
  * Document-method: Curses.unget_char
  * call-seq: unget_char(ch)
  *
@@ -2902,7 +2929,7 @@ window_get_char(VALUE obj)
 void
 Init_curses(void)
 {
-    keyboard_encoding = rb_locale_encoding();
+    keyboard_encoding = terminal_encoding = rb_locale_encoding();
 
     mCurses    = rb_define_module("Curses");
 
@@ -3021,6 +3048,8 @@ Init_curses(void)
     rb_define_module_function(mCurses, "reset_prog_mode", curses_reset_prog_mode, 0);
     rb_define_module_function(mCurses, "keyboard_encoding", curses_get_keyboard_encoding, 0);
     rb_define_module_function(mCurses, "keyboard_encoding=", curses_set_keyboard_encoding, 1);
+    rb_define_module_function(mCurses, "terminal_encoding", curses_get_terminal_encoding, 0);
+    rb_define_module_function(mCurses, "terminal_encoding=", curses_set_terminal_encoding, 1);
     rb_define_module_function(mCurses, "unget_char", curses_unget_char, 1);
     rb_define_module_function(mCurses, "get_char", curses_get_char, 0);
 
