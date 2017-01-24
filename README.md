@@ -38,8 +38,10 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 3. Compile multiple versions of Ruby.
 
+    $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.2.6
     $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.3.3
     $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.4.0
+    $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.2.6
     $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.3.3
     $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.4.0
 
