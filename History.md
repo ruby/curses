@@ -1,3 +1,9 @@
+### 1.1.1 / 2017-01-25
+
+Bug fixes:
+
+* Add -DPDC_WIDE to CPPFLAGS when compiling with PDCurses.
+
 ### 1.1.0 / 2017-01-24
 
 New features:
