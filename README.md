@@ -49,7 +49,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 5. Compile curses.gem.
 
-    $ rake RUBY_CC_VERSION=2.3.3:2.4.0 cross clobber compile native gem
+    $ rake RUBY_CC_VERSION=2.3.3:2.4.0 cross clean compile native gem
 
 Binary gems are generated in pkg/.
 
