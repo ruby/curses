@@ -1,3 +1,22 @@
+### 1.1.0
+
+New features:
+
+* Use bundler instead of hoe.  Pull request #18 by hsbt.
+* Enable appveyor.  Pull request #19 by hsbt.
+* Add badges for build status to README.md.  Pull request #20 by hsbt.
+* Add Curses.erase and Curses::Window.erase.
+* Add Curses::Window.redraw.
+* Add Curses.unget_char, Curses.get_char, and Curses::Window.get_char for
+  multibyte characters.
+* Add Curses.keyboard_encoding and Curses.terminal_encoding.
+* Support cross compilation for mingw32.
+
+Bug fixes:
+
+* Fix error in attron/attroff documentation.  Pull request #14 by stomar.
+* Improve code samples.  Pull request #15 by stomar.
+
 ### 1.0.2 / 2016-03-15
 
 Bug fixes:
