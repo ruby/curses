@@ -60,5 +60,12 @@ Binary gems are generated in pkg/.
 curses is released under the Ruby and 2-clause BSD licenses.  See COPYING for
 details.
 
+Binary gems for mingw32 include a forked version of PDCurses, which is in
+the public domain:
+
+  https://github.com/Bill-Gray/PDCurses
+
+The version for Win32 console mode in the win32 subdirectory is used.
+
 [1]: https://bugs.ruby-lang.org/issues/8584
 [2]: https://github.com/ruby/ruby/commit/9c5b2fd8aa0fd343ad094d47a638cfd3f6ae0a81
