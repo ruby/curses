@@ -26,6 +26,33 @@ To compile the extension library, run `bundle exec rake compile`.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `curses.gemspec`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
+### Cross compilation for Windows on Debian GNU/Linux based platforms
+
+1. Install development environment fo 32- and 64-bit Windows.
+
+    $ sudo apt-get install mingw-w64
+
+2. Install rake-compiler.
+
+    $ gem install rake-compiler
+
+3. Compile multiple versions of Ruby.
+
+    $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.3.3
+    $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.4.0
+    $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.3.3
+    $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.4.0
+
+3. Compile PDCurses.
+
+    $ rake build:pdcurses
+
+5. Compile curses.gem.
+
+    $ rake RUBY_CC_VERSION=2.3.3:2.4.0 cross clobber compile native gem
+
+Binary gems are generated in pkg/.
+
 ## License
 
 curses is released under the Ruby and 2-clause BSD licenses.  See COPYING for
