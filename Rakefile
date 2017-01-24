@@ -31,9 +31,9 @@ Rake::ExtensionTask.new(spec.name, spec) do |ext|
     File.expand_path("vendor/PDCurses", __dir__)
   ext.cross_config_options << {
     'x86-mingw32' => '--with-curses-lib=' +
-      File.expand_path("tmp/x86-mingw32/PDCurses", __dir__),
+      File.expand_path("vendor/x86-mingw32/PDCurses", __dir__),
     'x64-mingw32' => '--with-curses-lib=' +
-      File.expand_path("tmp/x64-mingw32/PDCurses", __dir__)
+      File.expand_path("vendor/x64-mingw32/PDCurses", __dir__)
   }
   ext.cross_compiling do |_spec|
     bin_file = "vendor/#{_spec.platform}/PDCurses/pdcurses.dll"
