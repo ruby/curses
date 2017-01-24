@@ -9,16 +9,28 @@ rescue LoadError => e
   warn "run: bundle install\n\n"
 end
 
+CLOBBER.include("vendor/x86-mingw32")
+CLOBBER.include("vendor/x64-mingw32")
+
 namespace :build do
   desc "Build PDCurses"
   task :pdcurses do
     mkdir_p "vendor/x86-mingw32/PDCurses"
     mkdir_p "vendor/x64-mingw32/PDCurses"
     chdir "vendor/PDCurses/win32" do
-      sh "make -f mingwin32.mak clean pdcurses.dll _linux_w32=1 WIDE=Y DLL=Y"
+      sh "make -f mingwin32.mak clean all _linux_w32=1 WIDE=Y DLL=Y"
       cp "pdcurses.dll", "../../x86-mingw32/PDCurses"
-      sh "make -f mingwin32.mak clean pdcurses.dll _linux_w64=1 WIDE=Y DLL=Y"
+      sh "make -f mingwin32.mak clean all _linux_w64=1 WIDE=Y DLL=Y"
       cp "pdcurses.dll", "../../x64-mingw32/PDCurses"
+    end
+  end
+end
+
+namespace :clean do
+  desc "Clean PDCurses"
+  task :pdcurses do
+    chdir "vendor/PDCurses/win32" do
+      sh "make -f mingwin32.mak clean _linux_w64=1"
     end
   end
 end
