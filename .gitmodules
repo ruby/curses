@@ -1,0 +1,3 @@
+[submodule "vendor/PDCurses"]
+	path = vendor/PDCurses
+	url = https://github.com/Bill-Gray/PDCurses.git
