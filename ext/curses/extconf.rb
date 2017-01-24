@@ -130,6 +130,10 @@ if header_library
   else
     warn "unexpected value for --with-curses-version: #{with_curses_version}"
   end
+
+  if enable_config("pdcurses-wide")
+    $defs << '-DPDC_WIDE'
+  end
   
   if RUBY_VERSION >= '2.1'
     create_makefile("curses")

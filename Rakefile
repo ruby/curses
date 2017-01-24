@@ -41,7 +41,7 @@ Rake::ExtensionTask.new(spec.name, spec) do |ext|
   ext.cross_platform = ["x86-mingw32", "x64-mingw32"]
   ext.cross_config_options << '--with-curses-include=' + 
     File.expand_path("vendor/PDCurses", __dir__) +
-    ' --with-curses-version=function'
+    ' --with-curses-version=function --enable-pdcurses-wide'
   ext.cross_config_options << {
     'x86-mingw32' => '--with-curses-lib=' +
       File.expand_path("vendor/x86-mingw32/PDCurses", __dir__),
