@@ -1,5 +1,6 @@
 pdcurses_path = File.expand_path("../vendor/#{RUBY_PLATFORM}/PDCurses", __dir__)
-if File.directory?(pdcurses_path)
+pdcurses_bundled = File.directory?(pdcurses_path)
+if pdcurses_bundled
   path = ENV["PATH"]
   dir = File::ALT_SEPARATOR ?
     pdcurses_path.tr("/", File::ALT_SEPARATOR) : dir
@@ -14,4 +15,8 @@ begin
   require "#{major}.#{minor}/curses.so"
 rescue LoadError
   require "curses.so"
+end
+
+if pdcurses_bundled
+  Curses.keyboard_encoding = Encoding::UTF_8
 end
