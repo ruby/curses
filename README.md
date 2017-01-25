@@ -30,28 +30,38 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 1. Install development environment fo 32- and 64-bit Windows.
 
-       $ sudo apt-get install mingw-w64
+   ```
+   $ sudo apt-get install mingw-w64
+   ```
 
 2. Install rake-compiler.
 
-       $ gem install rake-compiler
+   ```
+   $ gem install rake-compiler
+   ```
 
 3. Compile multiple versions of Ruby.
 
-       $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.2.6
-       $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.3.3
-       $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.4.0
-       $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.2.6
-       $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.3.3
-       $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.4.0
+   ```
+   $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.2.6
+   $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.3.3
+   $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.4.0
+   $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.2.6
+   $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.3.3
+   $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.4.0
+   ```
 
 3. Compile PDCurses.
 
-       $ rake build:pdcurses
+   ```
+   $ rake build:pdcurses
+   ```
 
 5. Compile curses.gem.
 
-       $ rake RUBY_CC_VERSION=2.3.3:2.4.0 cross clean compile native gem
+   ```
+   $ rake RUBY_CC_VERSION=2.3.3:2.4.0 cross clean compile native gem
+   ```
 
 Binary gems are generated in pkg/.
 
