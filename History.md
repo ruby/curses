@@ -1,3 +1,10 @@
+### 1.1.2 / 2017-02-06
+
+Bug fixes:
+
+* Use the left-alt-fix branch of https://github.com/shugo/PDCurses.git to get
+  ALT + < etc.
+
 ### 1.1.1 / 2017-01-25
 
 Bug fixes:
