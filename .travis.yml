@@ -2,7 +2,9 @@
 language: ruby
 notifications:
   email:
-  - drbrain@segment7.net
+    recipients:
+      - drbrain@segment7.net
+      - shugo@ruby-lang.org
 rvm:
   - 2.1.10
   - 2.2.6
