@@ -11,6 +11,7 @@ end
 
 CLOBBER.include("vendor/x86-mingw32")
 CLOBBER.include("vendor/x64-mingw32")
+CLOBBER.include("lib/2.*")
 
 namespace :build do
   desc "Build PDCurses"
