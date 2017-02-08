@@ -1,3 +1,9 @@
+### 1.1.3 / 2017-02-08
+
+Bug fixes:
+
+* Update PDCurses to handle extended keys.
+
 ### 1.1.2 / 2017-02-06
 
 Bug fixes:
