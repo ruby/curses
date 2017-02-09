@@ -1,5 +1,6 @@
 # curses
 
+[![Gem Version](https://badge.fury.io/rb/curses.svg)](https://badge.fury.io/rb/curses)
 [![Build Status](https://travis-ci.org/ruby/curses.svg?branch=master)](https://travis-ci.org/ruby/curses)
 [![Build status](https://ci.appveyor.com/api/projects/status/kdvksgjo4fyd3c4m/branch/master?svg=true)](https://ci.appveyor.com/project/ruby/curses/branch/master)
 
