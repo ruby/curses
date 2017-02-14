@@ -2927,7 +2927,12 @@ window_get_char(VALUE obj)
 void
 Init_curses(void)
 {
-    keyboard_encoding = terminal_encoding = rb_locale_encoding();
+#ifdef HAVE_GET_WCH
+    keyboard_encoding = rb_locale_encoding();
+#else
+    keyboard_encoding = rb_ascii8bit_encoding();
+#endif
+    terminal_encoding = rb_locale_encoding();
 
     mCurses    = rb_define_module("Curses");
 
