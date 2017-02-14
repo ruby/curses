@@ -2748,6 +2748,7 @@ static VALUE
 curses_unget_char(VALUE obj, VALUE ch)
 {
     ID id_ord;
+    unsigned int c;
 
     curses_stdscr();
     if (FIXNUM_P(ch)) {
@@ -2756,10 +2757,14 @@ curses_unget_char(VALUE obj, VALUE ch)
     else {
 	StringValue(ch);
 	CONST_ID(id_ord, "ord");
+	c = NUM2UINT(rb_funcall(ch, id_ord, 0));
 #ifdef HAVE_UNGET_WCH
-	unget_wch(NUM2UINT(rb_funcall(ch, id_ord, 0)));
+	unget_wch(c);
 #else
-	ungetch(NUM2UINT(rb_funcall(ch, id_ord, 0)));
+	if (c > 0xff) {
+	    rb_raise(rb_eRangeError, "Out of range: %u", c);
+	}
+	ungetch(c);
 #endif
     }
     return Qnil;
