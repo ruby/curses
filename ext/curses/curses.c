@@ -2747,9 +2747,7 @@ curses_set_terminal_encoding(VALUE obj, VALUE enc)
 static VALUE
 curses_unget_char(VALUE obj, VALUE ch)
 {
-#ifdef HAVE_UNGET_WCH
     ID id_ord;
-#endif
 
     curses_stdscr();
     if (FIXNUM_P(ch)) {
@@ -2757,11 +2755,11 @@ curses_unget_char(VALUE obj, VALUE ch)
     }
     else {
 	StringValue(ch);
-#ifdef HAVE_UNGET_WCH
 	CONST_ID(id_ord, "ord");
+#ifdef HAVE_UNGET_WCH
 	unget_wch(NUM2UINT(rb_funcall(ch, id_ord, 0)));
 #else
-	ungetch(NUM2UINT(ch));
+	ungetch(NUM2UINT(rb_funcall(ch, id_ord, 0)));
 #endif
     }
     return Qnil;
