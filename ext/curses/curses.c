@@ -998,6 +998,23 @@ curses_use_default_colors(VALUE obj)
 #define curses_use_default_colors rb_f_notimplement
 #endif
 
+#if defined(HAVE_ASSUME_DEFAULT_COLORS)
+/*
+ * tells which colors to paint for color pair 0.
+ *
+ * see also the system manual for default_colors(3)
+ */
+static VALUE
+curses_assume_default_colors(VALUE obj, VALUE fg, VALUE bg)
+{
+    curses_stdscr();
+    assume_default_colors(NUM2INT(fg), NUM2INT(bg));
+    return Qnil;
+}
+#else
+#define curses_assume_default_colors rb_f_notimplement
+#endif
+
 #if defined(HAVE_TABSIZE)
 /*
  * Document-method: Curses.TABSIZE=
@@ -2983,6 +3000,7 @@ Init_curses(void)
     rb_define_module_function(mCurses, "TABSIZE=", curses_tabsize_set, 1);
 
     rb_define_module_function(mCurses, "use_default_colors", curses_use_default_colors, 0);
+    rb_define_module_function(mCurses, "assume_default_colors", curses_assume_default_colors, 2);
     rb_define_module_function(mCurses, "init_screen", curses_init_screen, 0);
     rb_define_module_function(mCurses, "close_screen", curses_close_screen, 0);
     rb_define_module_function(mCurses, "closed?", curses_closed, 0);

@@ -61,8 +61,8 @@ if header_library
               wattroff wattron wattrset wbkgd wbkgdset wdeleteln wgetnstr
               wresize wscrl wsetscrreg werase redrawwin
               def_prog_mode reset_prog_mode timeout wtimeout nodelay
-              init_color wcolor_set use_default_colors newpad
-              unget_wch get_wch wget_wch)
+              init_color wcolor_set use_default_colors assume_default_colors
+              newpad unget_wch get_wch wget_wch)
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
   end
   flag = "-D_XOPEN_SOURCE_EXTENDED"
