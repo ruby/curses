@@ -1,3 +1,16 @@
+### 1.2.0 / 2017-02-19
+
+New features:
+
+* Add Curses.assume_default_colors.
+
+Bug fixes:
+
+* Curses.unget_char should use String#ord even if unget_wch() is not available.
+* The default value of keyboard_encoding should be ASCII-8BIT if get_wch() is
+  not available.
+* NUM2ULONG() should be used in Window#bkgd etc.
+
 ### 1.1.3 / 2017-02-08
 
 Bug fixes:
