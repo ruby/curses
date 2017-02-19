@@ -954,7 +954,7 @@ curses_bkgdset(VALUE obj, VALUE ch)
 {
 #ifdef HAVE_BKGDSET
     curses_stdscr();
-    bkgdset(NUM2CH(ch));
+    bkgdset(NUM2ULONG(ch));
 #endif
     return Qnil;
 }
@@ -975,7 +975,7 @@ curses_bkgd(VALUE obj, VALUE ch)
 {
 #ifdef HAVE_BKGD
     curses_stdscr();
-    return (bkgd(NUM2CH(ch)) == OK) ? Qtrue : Qfalse;
+    return (bkgd(NUM2ULONG(ch)) == OK) ? Qtrue : Qfalse;
 #else
     return Qfalse;
 #endif
@@ -2402,7 +2402,7 @@ window_bkgdset(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    wbkgdset(winp->window, NUM2CH(ch));
+    wbkgdset(winp->window, NUM2ULONG(ch));
 #endif
     return Qnil;
 }
@@ -2423,7 +2423,7 @@ window_bkgd(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    return (wbkgd(winp->window, NUM2CH(ch)) == OK) ? Qtrue : Qfalse;
+    return (wbkgd(winp->window, NUM2ULONG(ch)) == OK) ? Qtrue : Qfalse;
 #else
     return Qfalse;
 #endif
@@ -2442,7 +2442,7 @@ window_getbkgd(VALUE obj)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    return (c = getbkgd(winp->window) != ERR) ? CH2FIX(c) : Qnil;
+    return (c = getbkgd(winp->window) != ERR) ? ULONG2NUM(c) : Qnil;
 #else
     return Qnil;
 #endif
