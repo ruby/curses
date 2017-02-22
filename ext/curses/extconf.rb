@@ -60,6 +60,7 @@ if header_library
               scrl set setscrreg ungetch
               wattroff wattron wattrset wbkgd wbkgdset wdeleteln wgetnstr
               wresize wscrl wsetscrreg werase redrawwin
+              touchwin untouchwin wtouchln is_linetouched is_wintouched
               def_prog_mode reset_prog_mode timeout wtimeout nodelay
               init_color wcolor_set use_default_colors assume_default_colors
               newpad unget_wch get_wch wget_wch)

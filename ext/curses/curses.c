@@ -1696,6 +1696,122 @@ window_redraw(VALUE obj)
 #define window_redraw rb_f_notimplement
 #endif
 
+#ifdef HAVE_TOUCHWIN
+/*
+ * Document-method: Curses::Window.touch
+ *
+ * Treat the window as if it has been modified since the last call of refresh.
+ */
+static VALUE
+window_touch(VALUE obj)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    touchwin(winp->window);
+
+    return Qnil;
+}
+#else
+#define window_touch rb_f_notimplement
+#endif
+
+#ifdef HAVE_UNTOUCHWIN
+/*
+ * Document-method: Curses::Window.untouch
+ *
+ * Treat the window as if it has not been modified since the last call of
+ * refresh.
+ */
+static VALUE
+window_untouch(VALUE obj)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    untouchwin(winp->window);
+
+    return Qnil;
+}
+#else
+#define window_touch rb_f_notimplement
+#endif
+
+#ifdef HAVE_IS_WINTOUCHED
+/*
+ * Document-method: Curses::Window.touched?
+ *
+ * Return true if the window has been modified since the last call of refresh.
+ */
+static VALUE
+window_touched(VALUE obj)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    return is_wintouched(winp->window) ? Qtrue : Qfalse;
+}
+#else
+#define window_touched rb_f_notimplement
+#endif
+
+#ifdef HAVE_WTOUCHLN
+/*
+ * Document-method: Curses::Window.touch_line
+ * call-seq: touch_line(y, n, changed = true)
+ *
+ * Make n lines from line y look as if they have (changed = true) or have not
+ * (changed = false) been modified since the last call of refresh.
+ */
+static VALUE
+window_touch_line(int argc, VALUE *argv, VALUE obj)
+{
+    struct windata *winp;
+    VALUE y, n, changed;
+    int result;
+
+    rb_scan_args(argc, argv, "21", &y, &n, &changed);
+    if (argc < 3) {
+	changed = Qtrue;
+    }
+    GetWINDOW(obj, winp);
+    result = wtouchln(winp->window, NUM2INT(y), NUM2INT(n), RTEST(changed));
+    if (result == ERR) {
+	rb_raise(rb_eRangeError, "Out of window");
+    }
+
+    return Qnil;
+}
+#else
+#define window_touch_line rb_f_notimplement
+#endif
+
+#ifdef HAVE_IS_LINETOUCHED
+/*
+ * Document-method: Curses::Window.line_touched?
+ * call-seq: line_touched?(line)
+ *
+ * Return true if the specified line has been modified since the last call of
+ * refresh.
+ */
+static VALUE
+window_line_touched(VALUE obj, VALUE line)
+{
+    struct windata *winp;
+    int result, n;
+
+    GetWINDOW(obj, winp);
+    n = NUM2INT(line);
+    result = is_linetouched(winp->window, n);
+    if (result == ERR) {
+	rb_raise(rb_eArgError, "Invalid line %d", n);
+    }
+    return result ? Qtrue : Qfalse;
+}
+#else
+#define window_line_touched rb_f_notimplement
+#endif
+
 /*
  * Document-method: Curses::Window.move
  * call-seq: move(y,x)
@@ -2623,7 +2739,7 @@ pad_subpad(VALUE obj, VALUE height, VALUE width, VALUE begin_x, VALUE begin_y)
     x = NUM2INT(begin_x);
     y = NUM2INT(begin_y);
     GetWINDOW(obj, padp);
-    sub_pad = subpad(padp->window, h, w, x, y);
+    sub_pad = subwin(padp->window, h, w, x, y);
     pad = prep_window(rb_obj_class(obj), sub_pad);
 
     return pad;
@@ -3146,6 +3262,11 @@ Init_curses(void)
     rb_define_method(cWindow, "refresh", window_refresh, 0);
     rb_define_method(cWindow, "noutrefresh", window_noutrefresh, 0);
     rb_define_method(cWindow, "redraw", window_redraw, 0);
+    rb_define_method(cWindow, "touch", window_touch, 0);
+    rb_define_method(cWindow, "untouch", window_untouch, 0);
+    rb_define_method(cWindow, "touched?", window_touched, 0);
+    rb_define_method(cWindow, "touch_line", window_touch_line, -1);
+    rb_define_method(cWindow, "line_touched?", window_line_touched, 1);
     rb_define_method(cWindow, "box", window_box, -1);
     rb_define_method(cWindow, "move", window_move, 2);
     rb_define_method(cWindow, "setpos", window_setpos, 2);
