@@ -1680,7 +1680,7 @@ window_noutrefresh(VALUE obj)
 /*
  * Document-method: Curses::Window.redraw
  *
- * Dedraws the entire window.
+ * Redraws the entire window.
  */
 static VALUE
 window_redraw(VALUE obj)
