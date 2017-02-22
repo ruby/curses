@@ -1770,7 +1770,10 @@ window_touch_line(int argc, VALUE *argv, VALUE obj)
     VALUE y, n, changed;
     int result;
 
-    rb_scan_args(argc, argv, "21", &y, &n, &changed);
+    rb_scan_args(argc, argv, "12", &y, &n, &changed);
+    if (argc < 2) {
+	n = INT2NUM(1);
+    }
     if (argc < 3) {
 	changed = Qtrue;
     }
