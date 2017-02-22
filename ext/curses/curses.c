@@ -2601,9 +2601,6 @@ pad_initialize(VALUE obj, VALUE h, VALUE w)
     return obj;
 }
 
-#if 1
-#define pad_subpad window_subwin
-#else
 /*
  * Document-method: Curses::Pad.subpad
  * call-seq:
@@ -2617,7 +2614,7 @@ static VALUE
 pad_subpad(VALUE obj, VALUE height, VALUE width, VALUE begin_x, VALUE begin_y)
 {
     struct windata *padp;
-    WINDOW *subpad;
+    WINDOW *sub_pad;
     VALUE pad;
     int h, w, x, y;
 
@@ -2626,12 +2623,11 @@ pad_subpad(VALUE obj, VALUE height, VALUE width, VALUE begin_x, VALUE begin_y)
     x = NUM2INT(begin_x);
     y = NUM2INT(begin_y);
     GetWINDOW(obj, padp);
-    subpad = subwin(padp->window, h, w, x, y);
-    pad = prep_window(rb_obj_class(obj), subpad);
+    sub_pad = subpad(padp->window, h, w, x, y);
+    pad = prep_window(rb_obj_class(obj), sub_pad);
 
     return pad;
 }
-#endif
 
 /*
  * Document-method: Curses::Pad.refresh
