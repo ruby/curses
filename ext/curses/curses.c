@@ -2742,7 +2742,7 @@ pad_subpad(VALUE obj, VALUE height, VALUE width, VALUE begin_x, VALUE begin_y)
     x = NUM2INT(begin_x);
     y = NUM2INT(begin_y);
     GetWINDOW(obj, padp);
-    sub_pad = subwin(padp->window, h, w, x, y);
+    sub_pad = subpad(padp->window, h, w, x, y);
     pad = prep_window(rb_obj_class(obj), sub_pad);
 
     return pad;
