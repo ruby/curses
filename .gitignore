@@ -10,4 +10,5 @@
 /Gemfile.lock
 /vendor/x86-mingw32
 /vendor/x64-mingw32
+/ext/curses/Makefile
 .ruby-version
