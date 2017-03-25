@@ -66,6 +66,7 @@ if header_library
               newpad unget_wch get_wch wget_wch)
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
   end
+  convertible_int('chtype', curses)
   flag = "-D_XOPEN_SOURCE_EXTENDED"
   if try_static_assert("sizeof(char*)>sizeof(int)",
                        %w[stdio.h stdlib.h]+curses,
