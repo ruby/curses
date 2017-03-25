@@ -67,9 +67,7 @@ if header_library
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
   end
   flag = "-D_XOPEN_SOURCE_EXTENDED"
-  unless try_static_assert("sizeof(char*)<=sizeof(int)",
-                           %w[stdio.h stdlib.h]+curses,
-                           flag)
+  if try_compile(cpp_include(%w[stdio.h stdlib.h]+curses), flag, :werror => true)
     $defs << flag
   end
   have_var("ESCDELAY", curses)
