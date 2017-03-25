@@ -68,7 +68,9 @@ if header_library
   end
   convertible_int('chtype', [["#undef MOUSE_MOVED\n"]]+curses) or abort
   flag = "-D_XOPEN_SOURCE_EXTENDED"
-  if try_compile(cpp_include(%w[stdio.h stdlib.h]+curses), flag, :werror => true)
+  if checking_for("_XOPEN_SOURCE_EXTENDED") {
+       try_compile(cpp_include(%w[stdio.h stdlib.h]+curses), flag, :werror => true)
+     }
     $defs << flag
   end
   have_var("ESCDELAY", curses)
