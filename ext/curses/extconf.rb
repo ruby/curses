@@ -66,7 +66,7 @@ if header_library
               newpad unget_wch get_wch wget_wch)
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
   end
-  convertible_int('chtype', curses)
+  convertible_int('chtype', [["#undef MOUSE_MOVED\n"]]+curses) or abort
   flag = "-D_XOPEN_SOURCE_EXTENDED"
   if try_compile(cpp_include(%w[stdio.h stdlib.h]+curses), flag, :werror => true)
     $defs << flag
@@ -134,7 +134,7 @@ if header_library
   if enable_config("pdcurses-wide")
     $defs << '-DPDC_WIDE'
   end
-  
+
   if RUBY_VERSION >= '2.1'
     create_makefile("curses")
   else
