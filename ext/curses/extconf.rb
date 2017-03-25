@@ -138,6 +138,7 @@ if header_library
   end
 
   if RUBY_VERSION >= '2.1'
+    create_header
     create_makefile("curses")
   else
     # curses is part of ruby-core pre-2.1.0, so this gem is not required. But
