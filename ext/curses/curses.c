@@ -1898,7 +1898,7 @@ window_maxy(VALUE obj)
     return INT2FIX(getmaxy(winp->window));
 #elif defined(getmaxyx)
     {
-	int x, y;
+	int RB_UNUSED_VAR(x), y;
 	getmaxyx(winp->window, y, x);
 	return INT2FIX(y);
     }
@@ -1922,7 +1922,7 @@ window_maxx(VALUE obj)
     return INT2FIX(getmaxx(winp->window));
 #elif defined(getmaxyx)
     {
-	int x, y;
+	int x, RB_UNUSED_VAR(y);
 	getmaxyx(winp->window, y, x);
 	return INT2FIX(x);
     }
