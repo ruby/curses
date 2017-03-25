@@ -68,9 +68,7 @@ if header_library
   end
   convertible_int('chtype', curses)
   flag = "-D_XOPEN_SOURCE_EXTENDED"
-  if try_static_assert("sizeof(char*)>sizeof(int)",
-                       %w[stdio.h stdlib.h]+curses,
-                       flag)
+  if try_compile(cpp_include(%w[stdio.h stdlib.h]+curses), flag, :werror => true)
     $defs << flag
   end
   have_var("ESCDELAY", curses)
