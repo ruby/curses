@@ -1,3 +1,14 @@
+### 1.2.1 / 2017-03-27
+
+New features:
+
+* Add touch, untouch, touched?, touch_line, and line_touched?.
+
+Bug fixes:
+
+* Fix Pad#subpad to use subpad(3). (Issue #23)
+* Fix build issues on macOS.  Pull requests #24, #25, #26, #27 and #28 by nobu.
+
 ### 1.2.0 / 2017-02-19
 
 New features:
