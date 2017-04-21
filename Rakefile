@@ -9,6 +9,9 @@ rescue LoadError => e
   warn "run: bundle install\n\n"
 end
 
+$mswin = /mswin/ =~ RUBY_PLATFORM
+
+CLOBBER.include("vendor/#{RUBY_PLATFORM}") if $mswin
 CLOBBER.include("vendor/x86-mingw32")
 CLOBBER.include("vendor/x64-mingw32")
 CLOBBER.include("lib/2.*")
@@ -17,11 +20,18 @@ CLOBBER.include("pkg")
 namespace :build do
   desc "Build PDCurses"
   task :pdcurses do
+    mkdir_p "vendor/#{RUBY_PLATFORM}/PDCurses" if $mswin
     mkdir_p "vendor/x86-mingw32/PDCurses"
     mkdir_p "vendor/x64-mingw32/PDCurses"
     chdir "vendor/PDCurses/win32" do
+      if $mswin
+        sh "nmake -f vcwin32.mak clean all WIDE=Y"
+        cp "pdcurses.lib", "../../#{RUBY_PLATFORM}/PDCurses"
+      end
+
       sh "make -f mingwin32.mak clean all _linux_w32=1 WIDE=Y DLL=Y"
       cp "pdcurses.dll", "../../x86-mingw32/PDCurses"
+
       sh "make -f mingwin32.mak clean all _linux_w64=1 WIDE=Y DLL=Y"
       cp "pdcurses.dll", "../../x64-mingw32/PDCurses"
     end
@@ -32,6 +42,7 @@ namespace :clean do
   desc "Clean PDCurses"
   task :pdcurses do
     chdir "vendor/PDCurses/win32" do
+      sh "nmake -f vcwin32.mak clean" if $mswin
       sh "make -f mingwin32.mak clean _linux_w64=1"
     end
   end
@@ -39,6 +50,14 @@ end
 
 spec = eval(File.read(File.expand_path("curses.gemspec", __dir__)))
 Rake::ExtensionTask.new(spec.name, spec) do |ext|
+  if $mswin
+    ext.config_options << '--with-curses-include=' + 
+      File.expand_path("vendor/PDCurses", __dir__) +
+      ' --with-curses-version=function --enable-pdcurses-wide' +
+      ' --with-curses-lib=' +
+      File.expand_path("vendor/#{RUBY_PLATFORM}/PDCurses", __dir__)
+  end
+
   ext.cross_compile = true
   ext.cross_platform = ["x86-mingw32", "x64-mingw32"]
   ext.cross_config_options << '--with-curses-include=' + 
