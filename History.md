@@ -1,3 +1,11 @@
+### 1.2.2 / 2017-04-22
+
+New features:
+
+* Add Curses.get_key_modifiers, Curses.return_key_modifiers, and
+  Curses.save_key_modifiers.
+* Support mswin native build.  Pull request #29 by usa.
+
 ### 1.2.1 / 2017-03-27
 
 New features:
