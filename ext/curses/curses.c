@@ -3030,6 +3030,26 @@ window_get_char(VALUE obj)
 #endif
 }
 
+#ifdef HAVE_PDC_GET_KEY_MODIFIERS
+static VALUE
+curses_get_key_modifiers(VALUE obj)
+{
+    return ULONG2NUM(PDC_get_key_modifiers());
+}
+
+static VALUE
+curses_return_key_modifiers(VALUE obj, VALUE flag)
+{
+    return INT2NUM(PDC_return_key_modifiers(RTEST(flag)));
+}
+
+static VALUE
+curses_save_key_modifiers(VALUE obj, VALUE flag)
+{
+    return INT2NUM(PDC_save_key_modifiers(RTEST(flag)));
+}
+#endif
+
 /*------------------------- Initialization -------------------------*/
 
 /*
@@ -3193,6 +3213,11 @@ Init_curses(void)
     rb_define_module_function(mCurses, "terminal_encoding=", curses_set_terminal_encoding, 1);
     rb_define_module_function(mCurses, "unget_char", curses_unget_char, 1);
     rb_define_module_function(mCurses, "get_char", curses_get_char, 0);
+#ifdef HAVE_PDC_GET_KEY_MODIFIERS
+    rb_define_module_function(mCurses, "get_key_modifiers", curses_get_key_modifiers, 0);
+    rb_define_module_function(mCurses, "return_key_modifiers", curses_return_key_modifiers, 1);
+    rb_define_module_function(mCurses, "save_key_modifiers", curses_save_key_modifiers, 1);
+#endif
 
     {
         VALUE version;
@@ -3335,7 +3360,7 @@ Init_curses(void)
     rb_undef_method(cPad, "subwin");
 #endif
 
-#define rb_curses_define_const(c) rb_define_const(mCurses,#c,UINT2NUM(c))
+#define rb_curses_define_const(c) rb_define_const(mCurses,#c,CHTYPE2NUM(c))
 
 #ifdef USE_COLOR
     /* Document-const: A_ATTRIBUTES
@@ -4758,6 +4783,49 @@ Init_curses(void)
 	    rb_define_const(mCurses, name, INT2FIX(c - 'A' + 1));
 	}
     }
+#ifdef PDC_KEY_MODIFIER_SHIFT
+    /* PDCurses-specific keys */
+    rb_curses_define_const(ALT_0);
+    rb_curses_define_const(ALT_1);
+    rb_curses_define_const(ALT_2);
+    rb_curses_define_const(ALT_3);
+    rb_curses_define_const(ALT_4);
+    rb_curses_define_const(ALT_5);
+    rb_curses_define_const(ALT_6);
+    rb_curses_define_const(ALT_7);
+    rb_curses_define_const(ALT_8);
+    rb_curses_define_const(ALT_9);
+    rb_curses_define_const(ALT_A);
+    rb_curses_define_const(ALT_B);
+    rb_curses_define_const(ALT_C);
+    rb_curses_define_const(ALT_D);
+    rb_curses_define_const(ALT_E);
+    rb_curses_define_const(ALT_F);
+    rb_curses_define_const(ALT_G);
+    rb_curses_define_const(ALT_H);
+    rb_curses_define_const(ALT_I);
+    rb_curses_define_const(ALT_J);
+    rb_curses_define_const(ALT_K);
+    rb_curses_define_const(ALT_L);
+    rb_curses_define_const(ALT_M);
+    rb_curses_define_const(ALT_N);
+    rb_curses_define_const(ALT_O);
+    rb_curses_define_const(ALT_P);
+    rb_curses_define_const(ALT_Q);
+    rb_curses_define_const(ALT_R);
+    rb_curses_define_const(ALT_S);
+    rb_curses_define_const(ALT_T);
+    rb_curses_define_const(ALT_U);
+    rb_curses_define_const(ALT_V);
+    rb_curses_define_const(ALT_W);
+    rb_curses_define_const(ALT_X);
+    rb_curses_define_const(ALT_Y);
+    rb_curses_define_const(ALT_Z);
+    rb_curses_define_const(PDC_KEY_MODIFIER_SHIFT);
+    rb_curses_define_const(PDC_KEY_MODIFIER_CONTROL);
+    rb_curses_define_const(PDC_KEY_MODIFIER_ALT);
+    rb_curses_define_const(PDC_KEY_MODIFIER_NUMLOCK);
+#endif
 #undef rb_curses_define_const
 
     rb_set_end_proc(curses_finalize, 0);
