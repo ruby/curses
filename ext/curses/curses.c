@@ -140,6 +140,7 @@ prep_window(VALUE class, WINDOW *window)
 
 /*-------------------------- module Curses --------------------------*/
 
+static void curses_finalize(VALUE);
 /*
  * Document-method: Curses.init_screen
  *
@@ -155,6 +156,7 @@ curses_init_screen(void)
     if (stdscr == 0) {
 	rb_raise(rb_eRuntimeError, "can't initialize curses");
     }
+    rb_set_end_proc(curses_finalize, 0);
     clear();
     rb_stdscr = prep_window(cWindow, stdscr);
     return rb_stdscr;
@@ -4827,6 +4829,4 @@ Init_curses(void)
     rb_curses_define_const(PDC_KEY_MODIFIER_NUMLOCK);
 #endif
 #undef rb_curses_define_const
-
-    rb_set_end_proc(curses_finalize, 0);
 }
