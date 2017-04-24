@@ -138,6 +138,18 @@ prep_window(VALUE class, WINDOW *window)
     return obj;
 }
 
+#if defined(HAVE_ADDNWSTR) || defined(HAVE_WADDNWSTR)
+static inline rb_encoding *
+get_wide_encoding(void)
+{
+    static rb_encoding *utf16le = NULL;
+    if (!utf16le) {
+	utf16le = rb_enc_find("utf-16le");
+    }
+    return utf16le;
+}
+#endif
+
 /*-------------------------- module Curses --------------------------*/
 
 /*
@@ -648,11 +660,19 @@ static VALUE
 curses_addstr(VALUE obj, VALUE str)
 {
     StringValue(str);
+#if defined(HAVE_ADDNWSTR)
+    str = rb_str_export_to_enc(str, get_wide_encoding());
+    curses_stdscr();
+    if (!NIL_P(str)) {
+	addnwstr((wchar_t *)RSTRING_PTR(str), RSTRING_LEN(str) / sizeof(wchar_t));
+    }
+#else
     str = rb_str_export_to_enc(str, terminal_encoding);
     curses_stdscr();
     if (!NIL_P(str)) {
 	addstr(StringValueCStr(str));
     }
+#endif
     return Qnil;
 }
 
@@ -2118,9 +2138,15 @@ window_addstr(VALUE obj, VALUE str)
 	struct windata *winp;
 
 	StringValue(str);
+#if defined(HAVE_WADDNWSTR)
+	str = rb_str_export_to_enc(str, get_wide_encoding());
+	GetWINDOW(obj, winp);
+	waddnwstr(winp->window, (wchar_t *)RSTRING_PTR(str), RSTRING_LEN(str) / sizeof(wchar_t));
+#else
 	str = rb_str_export_to_enc(str, terminal_encoding);
 	GetWINDOW(obj, winp);
 	waddstr(winp->window, StringValueCStr(str));
+#endif
     }
     return Qnil;
 }
