@@ -54,6 +54,7 @@ Rake::ExtensionTask.new(spec.name, spec) do |ext|
     ext.config_options << '--with-curses-include=' + 
       File.expand_path("vendor/PDCurses", __dir__) +
       ' --with-curses-version=function --enable-pdcurses-wide' +
+      ' --enable-pdcurses-dll' +
       ' --with-curses-lib=' +
       File.expand_path("vendor/#{RUBY_PLATFORM}/PDCurses", __dir__)
     spec.files += ["vendor/#{RUBY_PLATFORM}/PDCurses/pdcurses.dll"]
