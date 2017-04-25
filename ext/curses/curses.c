@@ -138,7 +138,7 @@ prep_window(VALUE class, WINDOW *window)
     return obj;
 }
 
-#if defined(HAVE_ADDNWSTR) || defined(HAVE_WADDNWSTR)
+#if (defined(HAVE_ADDNWSTR) || defined(HAVE_WADDNWSTR)) && defined(_WIN32)
 static inline rb_encoding *
 get_wide_encoding(void)
 {
@@ -660,7 +660,7 @@ static VALUE
 curses_addstr(VALUE obj, VALUE str)
 {
     StringValue(str);
-#if defined(HAVE_ADDNWSTR)
+#if defined(HAVE_ADDNWSTR) && defined(_WIN32)
     str = rb_str_export_to_enc(str, get_wide_encoding());
     curses_stdscr();
     if (!NIL_P(str)) {
@@ -2138,7 +2138,7 @@ window_addstr(VALUE obj, VALUE str)
 	struct windata *winp;
 
 	StringValue(str);
-#if defined(HAVE_WADDNWSTR)
+#if defined(HAVE_WADDNWSTR) && defined(_WIN32)
 	str = rb_str_export_to_enc(str, get_wide_encoding());
 	GetWINDOW(obj, winp);
 	waddnwstr(winp->window, (wchar_t *)RSTRING_PTR(str), RSTRING_LEN(str) / sizeof(wchar_t));
