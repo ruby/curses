@@ -137,6 +137,10 @@ if header_library
     $defs << '-DPDC_WIDE'
   end
 
+  if enable_config("pdcurses-dll")
+    $defs << '-DPDC_DLL_BUILD'
+  end
+
   if RUBY_VERSION >= '2.1'
     create_header
     create_makefile("curses")
