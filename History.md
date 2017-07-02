@@ -1,3 +1,9 @@
+### 1.2.3 / 2017-07-03
+
+Bug fixes:
+
+* Fixes for mswin.  Pull requests #30 and #31 by unak.
+
 ### 1.2.2 / 2017-04-22
 
 New features:
