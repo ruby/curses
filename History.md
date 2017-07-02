@@ -2,7 +2,7 @@
 
 Bug fixes:
 
-* Fixes for mswin.  Pull requests #30 and #31 by unak.
+* Fixes for mswin.  Pull requests #30, #31, #32 and #33 by unak.
 
 ### 1.2.2 / 2017-04-22
 
