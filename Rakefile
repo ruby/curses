@@ -27,13 +27,13 @@ namespace :build do
       if $mswin
         sh "nmake -f vcwin32.mak clean all WIDE=Y DLL=Y"
         cp %w[pdcurses.dll pdcurses.lib], "../../#{RUBY_PLATFORM}/PDCurses"
+      else
+        sh "make -f mingwin32.mak clean all _linux_w32=1 WIDE=Y DLL=Y"
+        cp "pdcurses.dll", "../../x86-mingw32/PDCurses"
+
+        sh "make -f mingwin32.mak clean all _linux_w64=1 WIDE=Y DLL=Y"
+        cp "pdcurses.dll", "../../x64-mingw32/PDCurses"
       end
-
-      sh "make -f mingwin32.mak clean all _linux_w32=1 WIDE=Y DLL=Y"
-      cp "pdcurses.dll", "../../x86-mingw32/PDCurses"
-
-      sh "make -f mingwin32.mak clean all _linux_w64=1 WIDE=Y DLL=Y"
-      cp "pdcurses.dll", "../../x64-mingw32/PDCurses"
     end
   end
 end
@@ -54,6 +54,7 @@ Rake::ExtensionTask.new(spec.name, spec) do |ext|
     ext.config_options << '--with-curses-include=' + 
       File.expand_path("vendor/PDCurses", __dir__) +
       ' --with-curses-version=function --enable-pdcurses-wide' +
+      ' --enable-pdcurses-dll' +
       ' --with-curses-lib=' +
       File.expand_path("vendor/#{RUBY_PLATFORM}/PDCurses", __dir__)
     spec.files += ["vendor/#{RUBY_PLATFORM}/PDCurses/pdcurses.dll"]

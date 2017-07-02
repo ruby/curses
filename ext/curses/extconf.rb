@@ -57,9 +57,9 @@ if header_library
 
   for f in %w(beep bkgd bkgdset curs_set deleteln doupdate flash
               getbkgd getnstr init isendwin keyname keypad resizeterm
-              scrl set setscrreg ungetch
+              scrl set setscrreg ungetch addnwstr
               wattroff wattron wattrset wbkgd wbkgdset wdeleteln wgetnstr
-              wresize wscrl wsetscrreg werase redrawwin
+              wresize wscrl wsetscrreg werase redrawwin waddnwstr
               touchwin untouchwin wtouchln is_linetouched is_wintouched
               def_prog_mode reset_prog_mode timeout wtimeout nodelay
               init_color wcolor_set use_default_colors assume_default_colors
@@ -135,6 +135,10 @@ if header_library
 
   if enable_config("pdcurses-wide")
     $defs << '-DPDC_WIDE'
+  end
+
+  if enable_config("pdcurses-dll")
+    $defs << '-DPDC_DLL_BUILD'
   end
 
   if RUBY_VERSION >= '2.1'
