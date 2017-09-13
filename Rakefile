@@ -28,10 +28,10 @@ namespace :build do
         sh "nmake -f vcwin32.mak clean all WIDE=Y DLL=Y"
         cp %w[pdcurses.dll pdcurses.lib], "../../#{RUBY_PLATFORM}/PDCurses"
       else
-        sh "make -f mingwin32.mak clean all _linux_w32=1 WIDE=Y DLL=Y"
+        sh "make -f mingwin32.mak clean all WIDE=Y DLL=Y"
         cp "pdcurses.dll", "../../x86-mingw32/PDCurses"
 
-        sh "make -f mingwin32.mak clean all _linux_w64=1 WIDE=Y DLL=Y"
+        sh "make -f mingwin32.mak clean all _w64=1 WIDE=Y DLL=Y"
         cp "pdcurses.dll", "../../x64-mingw32/PDCurses"
       end
     end
