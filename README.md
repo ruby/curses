@@ -19,9 +19,14 @@ with the release of Ruby 2.1.0. (see [ruby/ruby@9c5b2fd][2])
 
     $ gem install curses
         
-Requires libncurses5-dev, which is not installed by default on Linux Mint and perhaps other debian based distributions.
+Requires ncurses or ncursesw (with wide character support).
+On Debian based distributions, you can install it with apt-get:
 
     $ apt install libncurses5-dev
+
+Or
+
+    $ apt install libncursesw5-dev
 
 ## Developers
 
