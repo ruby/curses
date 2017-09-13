@@ -1,5 +1,9 @@
 ### 1.2.4 / 2017-09-13
 
+New features:
+
+* Update PDCurses.
+
 Bug fixes:
 
 * Fix the path of pdcurses.dll for i386-mingw.  (Issue #36)
