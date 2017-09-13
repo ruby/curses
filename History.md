@@ -1,3 +1,13 @@
+### 1.2.4 / 2017-09-13
+
+Bug fixes:
+
+* Fix the path of pdcurses.dll for i386-mingw.  (Issue #36)
+
+Documentation:
+
+* Include reference to ncurses dependency.  Pull request #34 by qume.
+
 ### 1.2.3 / 2017-07-03
 
 Bug fixes:
