@@ -1,4 +1,5 @@
-pdcurses_path = File.expand_path("../vendor/#{RUBY_PLATFORM}/PDCurses", __dir__)
+platform = RUBY_PLATFORM.sub(/i[3-7]86/, "x86")
+pdcurses_path = File.expand_path("../vendor/#{platform}/PDCurses", __dir__)
 pdcurses_bundled = File.directory?(pdcurses_path)
 if pdcurses_bundled
   path = ENV["PATH"]
