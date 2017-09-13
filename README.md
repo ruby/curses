@@ -20,7 +20,7 @@ with the release of Ruby 2.1.0. (see [ruby/ruby@9c5b2fd][2])
     $ gem install curses
         
 Requires ncurses or ncursesw (with wide character support).
-On Debian based distributions, you can install it with apt-get:
+On Debian based distributions, you can install it with apt:
 
     $ apt install libncurses5-dev
 
