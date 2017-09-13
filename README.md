@@ -18,6 +18,10 @@ with the release of Ruby 2.1.0. (see [ruby/ruby@9c5b2fd][2])
 ## Install
 
     $ gem install curses
+        
+Requires libncurses5-dev, which is not installed by default on Linux Mint and perhaps other debian based distributions.
+
+    $ apt install libncurses5-dev
 
 ## Developers
 
