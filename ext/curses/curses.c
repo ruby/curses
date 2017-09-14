@@ -1854,6 +1854,28 @@ window_move(VALUE obj, VALUE y, VALUE x)
     return Qnil;
 }
 
+#ifdef HAVE_MVDERWIN
+/*
+ * Document-method: Curses::Window.move_relative
+ * call-seq: move_relative(x,y)
+ *
+ * Moves the derived or subwindow inside its parent window. The screen-relative
+ * parameters of the window are not changed.
+ */
+static VALUE
+window_move_relative(VALUE obj, VALUE y, VALUE x)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    mvderwin(winp->window, NUM2INT(y), NUM2INT(x));
+
+    return Qnil;
+}
+#else
+#define window_move_relative rb_f_notimplement
+#endif
+
 /*
  * Document-method: Curses::Window.setpos
  * call-seq: setpos(y, x)
@@ -3325,6 +3347,7 @@ Init_curses(void)
     rb_define_method(cWindow, "line_touched?", window_line_touched, 1);
     rb_define_method(cWindow, "box", window_box, -1);
     rb_define_method(cWindow, "move", window_move, 2);
+    rb_define_method(cWindow, "move_relative", window_move_relative, 2);
     rb_define_method(cWindow, "setpos", window_setpos, 2);
 #if defined(USE_COLOR) && defined(HAVE_WCOLOR_SET)
     rb_define_method(cWindow, "color_set", window_color_set, 1);
