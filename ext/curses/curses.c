@@ -1589,6 +1589,38 @@ window_subwin(VALUE obj, VALUE height, VALUE width, VALUE top, VALUE left)
     return win;
 }
 
+#ifdef HAVE_DERWIN
+/*
+ * Document-method: Curses::Window.derwin
+ * call-seq: derwin(height, width, relative_top, relative_left)
+ *
+ * Construct a new subwindow with constraints of
+ * +height+ lines, +width+ columns, begin at +top+ line, and begin +left+ most column
+ * relative to the parent window.
+ *
+ */
+static VALUE
+window_derwin(VALUE obj, VALUE height, VALUE width, VALUE top, VALUE left)
+{
+    struct windata *winp;
+    WINDOW *window;
+    VALUE win;
+    int h, w, t, l;
+
+    h = NUM2INT(height);
+    w = NUM2INT(width);
+    t = NUM2INT(top);
+    l = NUM2INT(left);
+    GetWINDOW(obj, winp);
+    window = derwin(winp->window, h, w, t, l);
+    win = prep_window(rb_obj_class(obj), window);
+
+    return win;
+}
+#else
+#define window_derwin rb_f_notimplement
+#endif
+
 /*
  * Document-method: Curses::Window.close
  *
@@ -3333,6 +3365,7 @@ Init_curses(void)
     rb_define_alloc_func(cWindow, window_s_allocate);
     rb_define_method(cWindow, "initialize", window_initialize, 4);
     rb_define_method(cWindow, "subwin", window_subwin, 4);
+    rb_define_method(cWindow, "derwin", window_derwin, 4);
     rb_define_method(cWindow, "close", window_close, 0);
     rb_define_method(cWindow, "clear", window_clear, 0);
     rb_define_method(cWindow, "erase", window_erase, 0);
