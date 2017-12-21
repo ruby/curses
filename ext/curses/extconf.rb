@@ -59,7 +59,7 @@ if header_library
               getbkgd getnstr init isendwin keyname keypad resizeterm
               scrl set setscrreg ungetch addnwstr
               wattroff wattron wattrset wbkgd wbkgdset wdeleteln wgetnstr
-              wresize wscrl wsetscrreg werase redrawwin waddnwstr
+              wresize wscrl wsetscrreg werase redrawwin waddnwstr mvderwin derwin
               touchwin untouchwin wtouchln is_linetouched is_wintouched
               def_prog_mode reset_prog_mode timeout wtimeout nodelay
               init_color wcolor_set use_default_colors assume_default_colors

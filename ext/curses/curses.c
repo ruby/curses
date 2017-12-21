@@ -1589,6 +1589,38 @@ window_subwin(VALUE obj, VALUE height, VALUE width, VALUE top, VALUE left)
     return win;
 }
 
+#ifdef HAVE_DERWIN
+/*
+ * Document-method: Curses::Window.derwin
+ * call-seq: derwin(height, width, relative_top, relative_left)
+ *
+ * Construct a new subwindow with constraints of
+ * +height+ lines, +width+ columns, begin at +top+ line, and begin +left+ most column
+ * relative to the parent window.
+ *
+ */
+static VALUE
+window_derwin(VALUE obj, VALUE height, VALUE width, VALUE top, VALUE left)
+{
+    struct windata *winp;
+    WINDOW *window;
+    VALUE win;
+    int h, w, t, l;
+
+    h = NUM2INT(height);
+    w = NUM2INT(width);
+    t = NUM2INT(top);
+    l = NUM2INT(left);
+    GetWINDOW(obj, winp);
+    window = derwin(winp->window, h, w, t, l);
+    win = prep_window(rb_obj_class(obj), window);
+
+    return win;
+}
+#else
+#define window_derwin rb_f_notimplement
+#endif
+
 /*
  * Document-method: Curses::Window.close
  *
@@ -1853,6 +1885,28 @@ window_move(VALUE obj, VALUE y, VALUE x)
 
     return Qnil;
 }
+
+#ifdef HAVE_MVDERWIN
+/*
+ * Document-method: Curses::Window.move_relative
+ * call-seq: move_relative(x,y)
+ *
+ * Moves the derived or subwindow inside its parent window. The screen-relative
+ * parameters of the window are not changed.
+ */
+static VALUE
+window_move_relative(VALUE obj, VALUE y, VALUE x)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    mvderwin(winp->window, NUM2INT(y), NUM2INT(x));
+
+    return Qnil;
+}
+#else
+#define window_move_relative rb_f_notimplement
+#endif
 
 /*
  * Document-method: Curses::Window.setpos
@@ -3311,6 +3365,7 @@ Init_curses(void)
     rb_define_alloc_func(cWindow, window_s_allocate);
     rb_define_method(cWindow, "initialize", window_initialize, 4);
     rb_define_method(cWindow, "subwin", window_subwin, 4);
+    rb_define_method(cWindow, "derwin", window_derwin, 4);
     rb_define_method(cWindow, "close", window_close, 0);
     rb_define_method(cWindow, "clear", window_clear, 0);
     rb_define_method(cWindow, "erase", window_erase, 0);
@@ -3325,6 +3380,7 @@ Init_curses(void)
     rb_define_method(cWindow, "line_touched?", window_line_touched, 1);
     rb_define_method(cWindow, "box", window_box, -1);
     rb_define_method(cWindow, "move", window_move, 2);
+    rb_define_method(cWindow, "move_relative", window_move_relative, 2);
     rb_define_method(cWindow, "setpos", window_setpos, 2);
 #if defined(USE_COLOR) && defined(HAVE_WCOLOR_SET)
     rb_define_method(cWindow, "color_set", window_color_set, 1);
