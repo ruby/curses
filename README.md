@@ -28,6 +28,10 @@ Or
 
     $ apt install libncursesw5-dev
 
+## Documentation
+
+See [http://www.rubydoc.info/gems/curses](http://www.rubydoc.info/gems/curses).
+
 ## Developers
 
 After checking out the repo, run `bundle install` to install dependencies.
