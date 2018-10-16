@@ -1,3 +1,14 @@
+### 1.2.5 / 2018-10-16
+
+New features:
+
+* Add mvderwin and derwin methods to Window.  Pull request #37 by meschbach.
+* Add documentation link.  Pull request #39 by atshakil.
+
+Bug fixes:
+
+* Favor ncursesw over curses.  Pull request #40 by DivineDominion.
+
 ### 1.2.4 / 2017-09-13
 
 New features:
