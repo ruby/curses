@@ -16,13 +16,16 @@ menu = Curses::Menu.new([
 menu.post
 
 while ch = Curses.getch
-  case ch
-  when Curses::KEY_UP, ?k
-    menu.driver(Curses::REQ_UP_ITEM)
-  when Curses::KEY_DOWN, ?j
-    menu.driver(Curses::REQ_DOWN_ITEM)
-  else
-    break
+  begin
+    case ch
+    when Curses::KEY_UP, ?k
+      menu.driver(Curses::REQ_UP_ITEM)
+    when Curses::KEY_DOWN, ?j
+      menu.driver(Curses::REQ_DOWN_ITEM)
+    else
+      break
+    end
+  rescue Curses::RequestDeniedError
   end
 end
 

@@ -84,11 +84,112 @@ static VALUE cMouseEvent;
 static VALUE cItem;
 static VALUE cMenu;
 #endif
+static VALUE eError;
+static VALUE eSystemError;
+static VALUE eBadArgumentError;
+static VALUE ePostedError;
+static VALUE eConnectedError;
+static VALUE eBadStateError;
+static VALUE eNoRoomError;
+static VALUE eNotPostedError;
+static VALUE eUnknownCommandError;
+static VALUE eNoMatchError;
+static VALUE eNotSelectableError;
+static VALUE eNotConnectedError;
+static VALUE eRequestDeniedError;
+static VALUE eInvalidFieldError;
+static VALUE eCurrentError;
 
 static VALUE rb_stdscr;
 
 static rb_encoding *keyboard_encoding;
 static rb_encoding *terminal_encoding;
+
+#ifndef E_OK
+#define E_OK 0
+#endif
+
+static void
+check_curses_error(int error)
+{
+    switch (error) {
+    case E_OK:
+	break;
+#ifdef E_SYSTEM_ERROR
+    case E_SYSTEM_ERROR:
+	rb_raise(eSystemError, "A system error occurred");
+	break;
+#endif
+#ifdef E_BAD_ARGUMENT
+    case E_BAD_ARGUMENT:
+	rb_raise(eBadArgumentError, "Incorrect or out-of-range argument");
+	break;
+#endif
+#ifdef E_POSTED
+    case E_POSTED:
+	rb_raise(ePostedError, "The menu has already been posted");
+	break;
+#endif
+#ifdef E_CONNECTED
+    case E_CONNECTED:
+	rb_raise(eConnectedError, "The field is already connected to a form");
+	break;
+#endif
+#ifdef E_BAD_STATE
+    case E_BAD_STATE:
+	rb_raise(eBadStateError, "Called from an initialization or termination function");
+	break;
+#endif
+#ifdef E_NO_ROOM
+    case E_NO_ROOM:
+	rb_raise(eNoRoomError, "Form is too large for its window");
+	break;
+#endif
+#ifdef E_NOT_POSTED
+    case E_NOT_POSTED:
+	rb_raise(eNotPostedError, "The menu has not been posted");
+	break;
+#endif
+#ifdef E_UNKNOWN_COMMAND
+    case E_UNKNOWN_COMMAND:
+	rb_raise(eUnknownCommandError, "Unknown command");
+	break;
+#endif
+#ifdef E_NO_MATCH
+    case E_NO_MATCH:
+	rb_raise(eNoMatchError, "Character failed to match");
+	break;
+#endif
+#ifdef E_NOT_SELECTABLE
+    case E_NOT_SELECTABLE:
+	rb_raise(eNotSelectableError, "The designated item cannot be selected");
+	break;
+#endif
+#ifdef E_NOT_CONNECTED
+    case E_NOT_CONNECTED:
+	rb_raise(eNotConnectedError, "No fields or items are connected");
+	break;
+#endif
+#ifdef E_REQUEST_DENIED
+    case E_REQUEST_DENIED:
+	rb_raise(eRequestDeniedError, "The request could not be processed");
+	break;
+#endif
+#ifdef E_INVALID_FIELD
+    case E_INVALID_FIELD:
+	rb_raise(eInvalidFieldError, "Contents of a field is not valid");
+	break;
+#endif
+#ifdef E_CURRENT
+    case E_CURRENT:
+	rb_raise(eCurrentError, "The field is the current field");
+	break;
+#endif
+    default:
+	rb_raise(eError, "Unknown error");
+	break;
+    }
+}
 
 struct windata {
     WINDOW *window;
@@ -2988,6 +3089,9 @@ item_initialize(VALUE obj, VALUE name, VALUE description)
     description = rb_str_export_to_enc(description, terminal_encoding);
     itemp->item = new_item(StringValueCStr(name),
 			   StringValueCStr(description));
+    if (itemp->item == NULL) {
+	check_curses_error(errno);
+    }
 
     return obj;
 }
@@ -3074,6 +3178,9 @@ menu_initialize(VALUE obj, VALUE items)
     }
     menu_items[RARRAY_LEN(items)] = NULL;
     menup->menu = new_menu(menu_items);
+    if (menup->menu == NULL) {
+	check_curses_error(errno);
+    }
 
     return obj;
 }
@@ -3090,9 +3197,11 @@ static VALUE
 menu_post(VALUE obj)
 {
     struct menudata *menup;
+    int error;
 
     GetMENU(obj, menup);
-    post_menu(menup->menu);
+    error = post_menu(menup->menu);
+    check_curses_error(error);
 
     return obj;
 }
@@ -3109,9 +3218,11 @@ static VALUE
 menu_unpost(VALUE obj)
 {
     struct menudata *menup;
+    int error;
 
     GetMENU(obj, menup);
-    unpost_menu(menup->menu);
+    error = unpost_menu(menup->menu);
+    check_curses_error(error);
 
     return obj;
 }
@@ -3128,9 +3239,11 @@ static VALUE
 menu_driver_m(VALUE obj, VALUE command)
 {
     struct menudata *menup;
+    int error;
 
     GetMENU(obj, menup);
-    menu_driver(menup->menu, NUM2INT(command));
+    error = menu_driver(menup->menu, NUM2INT(command));
+    check_curses_error(error);
 
     return obj;
 }
@@ -3694,6 +3807,26 @@ Init_curses(void)
     rb_define_method(cMenu, "unpost", menu_unpost, 0);
     rb_define_method(cMenu, "driver", menu_driver_m, 1);
 #endif
+
+#define rb_curses_define_error(c) do { \
+	e##c = rb_define_class_under(mCurses, #c, eError); \
+} while (0)    
+
+    eError = rb_define_class_under(mCurses, "Error", rb_eStandardError);
+    rb_curses_define_error(SystemError);
+    rb_curses_define_error(BadArgumentError);
+    rb_curses_define_error(PostedError);
+    rb_curses_define_error(ConnectedError);
+    rb_curses_define_error(BadStateError);
+    rb_curses_define_error(NoRoomError);
+    rb_curses_define_error(NotPostedError);
+    rb_curses_define_error(UnknownCommandError);
+    rb_curses_define_error(NoMatchError);
+    rb_curses_define_error(NotSelectableError);
+    rb_curses_define_error(NotConnectedError);
+    rb_curses_define_error(RequestDeniedError);
+    rb_curses_define_error(InvalidFieldError);
+    rb_curses_define_error(CurrentError);
 
 #define rb_curses_define_const(c) rb_define_const(mCurses,#c,CHTYPE2NUM(c))
 
