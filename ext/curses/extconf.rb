@@ -141,6 +141,15 @@ if header_library
     $defs << '-DPDC_DLL_BUILD'
   end
 
+  if (have_header("ncursesw/menu.h") ||
+      have_header("ncurses/menu.h") ||
+      have_header("curses/menu.h") ||
+      have_header("menu.h")) &&
+      (have_library("menuw", "new_menu") ||
+       have_library("menu", "new_menu"))
+    $defs << '-DHAVE_MENU'
+  end
+
   if RUBY_VERSION >= '2.1'
     create_header
     create_makefile("curses")

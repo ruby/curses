@@ -51,6 +51,16 @@
 # endif
 #endif
 
+#if defined(HAVE_NCURSESW_MENU_H)
+# include <ncursesw/menu.h>
+#elif defined(HAVE_NCURSES_MENU_H)
+# include <ncurses/menu.h>
+#elif defined(HAVE_CURSES_MENU_H)
+# include <curses/menu.h>
+#elif defined(HAVE_MENU_H)
+# include <menu.h>
+#endif
+
 #ifdef HAVE_INIT_COLOR
 # define USE_COLOR 1
 #endif
@@ -69,6 +79,10 @@ static VALUE cWindow;
 static VALUE cPad;
 #ifdef USE_MOUSE
 static VALUE cMouseEvent;
+#endif
+#ifdef HAVE_MENU
+static VALUE cItem;
+static VALUE cMenu;
 #endif
 
 static VALUE rb_stdscr;
@@ -2899,6 +2913,230 @@ pad_noutrefresh(VALUE obj, VALUE pminrow, VALUE pmincol, VALUE sminrow,
 }
 #endif /* HAVE_NEWPAD */
 
+#ifdef HAVE_MENU
+/*--------------------------- class Item ----------------------------*/
+
+struct itemdata {
+    ITEM *item;
+};
+
+static void
+no_item(void)
+{
+    rb_raise(rb_eRuntimeError, "already deleted item");
+}
+
+#define GetITEM(obj, itemp) do {\
+    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
+	rb_raise(rb_eSecurityError, "Insecure: operation on untainted item");\
+    TypedData_Get_Struct((obj), struct itemdata, &itemdata_type, (itemp));\
+    if ((itemp)->item == 0) no_item();\
+} while (0)
+
+static void
+item_free(void *p)
+{
+    struct itemdata *itemp = p;
+    if (itemp->item) free_item(itemp->item);
+    itemp->item = 0;
+    xfree(itemp);
+}
+
+static size_t
+item_memsize(const void *p)
+{
+    const struct itemdata *itemp = p;
+    size_t size = sizeof(*itemp);
+    if (!itemp) return 0;
+    if (itemp->item) size += sizeof(itemp->item);
+    return size;
+}
+
+static const rb_data_type_t itemdata_type = {
+    "itemdata",
+    {0, item_free, item_memsize,}
+};
+
+/* returns a Curses::Item object */
+static VALUE
+item_s_allocate(VALUE class)
+{
+    struct itemdata *itemp;
+
+    return TypedData_Make_Struct(class, struct itemdata, &itemdata_type, itemp);
+}
+
+/*
+ * Document-method: Curses::Item.new
+ *
+ * call-seq:
+ *   new(name, description)
+ *
+ * Construct a new Curses::Item.
+ */
+static VALUE
+item_initialize(VALUE obj, VALUE name, VALUE description)
+{
+    struct itemdata *itemp;
+
+    curses_init_screen();
+    TypedData_Get_Struct(obj, struct itemdata, &itemdata_type, itemp);
+    if (itemp->item) {
+	rb_raise(rb_eRuntimeError, "already initialized item");
+    }
+    name = rb_str_export_to_enc(name, terminal_encoding);
+    description = rb_str_export_to_enc(description, terminal_encoding);
+    itemp->item = new_item(StringValueCStr(name),
+			   StringValueCStr(description));
+
+    return obj;
+}
+
+struct menudata {
+    MENU *menu;
+};
+
+static void
+no_menu(void)
+{
+    rb_raise(rb_eRuntimeError, "already deleted menu");
+}
+
+#define GetMENU(obj, menup) do {\
+    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
+	rb_raise(rb_eSecurityError, "Insecure: operation on untainted menu");\
+    TypedData_Get_Struct((obj), struct menudata, &menudata_type, (menup));\
+    if ((menup)->menu == 0) no_menu();\
+} while (0)
+
+static void
+menu_free(void *p)
+{
+    struct menudata *menup = p;
+    ITEM **items = menu_items(menup->menu);
+    if (menup->menu) free_menu(menup->menu);
+    xfree(items);
+    menup->menu = 0;
+    xfree(menup);
+}
+
+static size_t
+menu_memsize(const void *p)
+{
+    const struct menudata *menup = p;
+    size_t size = sizeof(*menup);
+    if (!menup) return 0;
+    if (menup->menu) size += sizeof(menup->menu);
+    return size;
+}
+
+static const rb_data_type_t menudata_type = {
+    "menudata",
+    {0, menu_free, menu_memsize,}
+};
+
+/* returns a Curses::Menu object */
+static VALUE
+menu_s_allocate(VALUE class)
+{
+    struct menudata *menup;
+
+    return TypedData_Make_Struct(class, struct menudata, &menudata_type, menup);
+}
+
+/*
+ * Document-method: Curses::Menu.new
+ *
+ * call-seq:
+ *   new(name, description)
+ *
+ * Construct a new Curses::Menu.
+ */
+static VALUE
+menu_initialize(VALUE obj, VALUE items)
+{
+    struct menudata *menup;
+    ITEM **menu_items;
+    int i;
+
+    Check_Type(items, T_ARRAY);
+    curses_init_screen();
+    TypedData_Get_Struct(obj, struct menudata, &menudata_type, menup);
+    if (menup->menu) {
+	rb_raise(rb_eRuntimeError, "already initialized menu");
+    }
+    menu_items = ALLOC_N(ITEM *, RARRAY_LEN(items) + 1);
+    for (i = 0; i < RARRAY_LEN(items); i++) {
+	struct itemdata *itemp;
+
+	GetITEM(RARRAY_AREF(items, i), itemp);
+	menu_items[i] = itemp->item;
+    }
+    menu_items[RARRAY_LEN(items)] = NULL;
+    menup->menu = new_menu(menu_items);
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#post
+ *
+ * call-seq:
+ *   post
+ *
+ * Post the menu.
+ */
+static VALUE
+menu_post(VALUE obj)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    post_menu(menup->menu);
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#unpost
+ *
+ * call-seq:
+ *   unpost
+ *
+ * Unpost the menu.
+ */
+static VALUE
+menu_unpost(VALUE obj)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    unpost_menu(menup->menu);
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#driver
+ *
+ * call-seq:
+ *   driver(command)
+ *
+ * Perform the command on the menu.
+ */
+static VALUE
+menu_driver_m(VALUE obj, VALUE command)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    menu_driver(menup->menu, NUM2INT(command));
+
+    return obj;
+}
+
+#endif /* HAVE_MENU */
+
 /*
  * Document-method: Curses.keyboard_encoding
  * call-seq: Curses.keyboard_encoding
@@ -3442,6 +3680,19 @@ Init_curses(void)
     rb_define_method(cPad, "refresh", pad_refresh, 6);
     rb_define_method(cPad, "noutrefresh", pad_noutrefresh, 6);
     rb_undef_method(cPad, "subwin");
+#endif
+
+#ifdef HAVE_MENU
+    cItem = rb_define_class_under(mCurses, "Item", rb_cData);
+    rb_define_alloc_func(cItem, item_s_allocate);
+    rb_define_method(cItem, "initialize", item_initialize, 2);
+
+    cMenu = rb_define_class_under(mCurses, "Menu", rb_cData);
+    rb_define_alloc_func(cMenu, menu_s_allocate);
+    rb_define_method(cMenu, "initialize", menu_initialize, 1);
+    rb_define_method(cMenu, "post", menu_post, 0);
+    rb_define_method(cMenu, "unpost", menu_unpost, 0);
+    rb_define_method(cMenu, "driver", menu_driver_m, 1);
 #endif
 
 #define rb_curses_define_const(c) rb_define_const(mCurses,#c,CHTYPE2NUM(c))
@@ -4909,6 +5160,26 @@ Init_curses(void)
     rb_curses_define_const(PDC_KEY_MODIFIER_CONTROL);
     rb_curses_define_const(PDC_KEY_MODIFIER_ALT);
     rb_curses_define_const(PDC_KEY_MODIFIER_NUMLOCK);
+#endif
+
+#ifdef HAVE_MENU
+    rb_curses_define_const(REQ_LEFT_ITEM);
+    rb_curses_define_const(REQ_RIGHT_ITEM);
+    rb_curses_define_const(REQ_UP_ITEM);
+    rb_curses_define_const(REQ_DOWN_ITEM);
+    rb_curses_define_const(REQ_SCR_ULINE);
+    rb_curses_define_const(REQ_SCR_DLINE);
+    rb_curses_define_const(REQ_SCR_DPAGE);
+    rb_curses_define_const(REQ_SCR_UPAGE);
+    rb_curses_define_const(REQ_FIRST_ITEM);
+    rb_curses_define_const(REQ_LAST_ITEM);
+    rb_curses_define_const(REQ_NEXT_ITEM);
+    rb_curses_define_const(REQ_PREV_ITEM);
+    rb_curses_define_const(REQ_TOGGLE_ITEM);
+    rb_curses_define_const(REQ_CLEAR_PATTERN);
+    rb_curses_define_const(REQ_BACK_PATTERN);
+    rb_curses_define_const(REQ_NEXT_MATCH);
+    rb_curses_define_const(REQ_PREV_MATCH);
 #endif
 #undef rb_curses_define_const
 }
