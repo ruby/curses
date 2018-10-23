@@ -19,9 +19,9 @@ while ch = Curses.getch
   begin
     case ch
     when Curses::KEY_UP, ?k
-      menu.driver(Curses::REQ_UP_ITEM)
+      menu.up_item
     when Curses::KEY_DOWN, ?j
-      menu.driver(Curses::REQ_DOWN_ITEM)
+      menu.down_item
     else
       break
     end
