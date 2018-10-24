@@ -3096,8 +3096,52 @@ item_initialize(VALUE obj, VALUE name, VALUE description)
     return obj;
 }
 
+static VALUE
+item_new(ITEM *item)
+{
+    VALUE obj = item_s_allocate(cItem);
+    struct itemdata *itemp;
+
+    TypedData_Get_Struct(obj, struct itemdata, &itemdata_type, itemp);
+    itemp->item = item;
+    return obj;
+}
+
+static VALUE
+item_eq(VALUE obj, VALUE other)
+{
+    struct itemdata *item1, *item2;
+
+    GetITEM(obj, item1);
+    GetITEM(other, item2);
+    return item1->item == item2->item ? Qtrue : Qfalse;
+}
+
+static VALUE
+item_name_m(VALUE obj)
+{
+    struct itemdata *itemp;
+    const char *name;
+
+    GetITEM(obj, itemp);
+    name = item_name(itemp->item);
+    return rb_external_str_new_with_enc(name, strlen(name), terminal_encoding);
+}
+
+static VALUE
+item_description_m(VALUE obj)
+{
+    struct itemdata *itemp;
+    const char *desc;
+
+    GetITEM(obj, itemp);
+    desc = item_description(itemp->item);
+    return rb_external_str_new_with_enc(desc, strlen(desc), terminal_encoding);
+}
+
 struct menudata {
     MENU *menu;
+    VALUE items;
 };
 
 static void
@@ -3112,6 +3156,14 @@ no_menu(void)
     TypedData_Get_Struct((obj), struct menudata, &menudata_type, (menup));\
     if ((menup)->menu == 0) no_menu();\
 } while (0)
+
+static void
+menu_gc_mark(void *p)
+{
+    struct menudata *menup = p;
+
+    rb_gc_mark(menup->items);
+}    
 
 static void
 menu_free(void *p)
@@ -3136,7 +3188,7 @@ menu_memsize(const void *p)
 
 static const rb_data_type_t menudata_type = {
     "menudata",
-    {0, menu_free, menu_memsize,}
+    {menu_gc_mark, menu_free, menu_memsize,}
 };
 
 /* returns a Curses::Menu object */
@@ -3181,6 +3233,7 @@ menu_initialize(VALUE obj, VALUE items)
     if (menup->menu == NULL) {
 	check_curses_error(errno);
     }
+    menup->items = rb_ary_dup(items);
 
     return obj;
 }
@@ -3246,6 +3299,110 @@ menu_driver_m(VALUE obj, VALUE command)
     check_curses_error(error);
 
     return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#current_item
+ *
+ * call-seq:
+ *   current_item
+ *
+ * Returns the current item.
+ */
+static VALUE
+menu_current_item(VALUE obj)
+{
+    struct menudata *menup;
+    ITEM *item;
+
+    GetMENU(obj, menup);
+    item = current_item(menup->menu);
+    if (item == NULL) {
+	return Qnil;
+    }
+    return item_new(item);
+}
+
+/*
+ * Document-method: Curses::Menu#item_count
+ *
+ * call-seq:
+ *   item_count
+ *
+ * Returns the count of items in the menu.
+ */
+static VALUE
+menu_item_count(VALUE obj)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    return INT2NUM(item_count(menup->menu));
+}
+
+/*
+ * Document-method: Curses::Menu#items
+ *
+ * call-seq:
+ *   items
+ *
+ * Returns the items of the menu.
+ */
+static VALUE
+menu_get_items(VALUE obj)
+{
+    struct menudata *menup;
+    ITEM **items;
+    int count, i;
+    VALUE ary;
+
+    GetMENU(obj, menup);
+    items = menu_items(menup->menu);
+    if (items == NULL) {
+	return Qnil;
+    }
+    count = item_count(menup->menu);
+    ary = rb_ary_new();
+    for (i = 0; i < count; i++) {
+	rb_ary_push(ary, item_new(items[i]));
+    }
+    return ary;
+}
+
+/*
+ * Document-method: Curses::Menu#items=
+ *
+ * call-seq:
+ *   items=(items)
+ *
+ * Returns the items of the menu.
+ */
+static VALUE
+menu_set_items(VALUE obj, VALUE items)
+{
+    struct menudata *menup;
+    ITEM **old_items, **new_items;
+    int i, error;
+
+    Check_Type(items, T_ARRAY);
+    GetMENU(obj, menup);
+    old_items = menu_items(menup->menu);
+    new_items = ALLOC_N(ITEM*, RARRAY_LEN(items) + 1);
+    for (i = 0; i < RARRAY_LEN(items); i++) {
+	struct itemdata *itemp;
+	GetITEM(RARRAY_AREF(items, i), itemp);
+	new_items[i] = itemp->item;
+    }
+    new_items[RARRAY_LEN(items)] = NULL;
+    error = set_menu_items(menup->menu, new_items);
+    if (error != E_OK) {
+	xfree(new_items);
+	check_curses_error(error);
+	return items;
+    }
+    xfree(old_items);
+    menup->items = rb_ary_dup(items);
+    return items;
 }
 
 #endif /* HAVE_MENU */
@@ -3799,6 +3956,9 @@ Init_curses(void)
     cItem = rb_define_class_under(mCurses, "Item", rb_cData);
     rb_define_alloc_func(cItem, item_s_allocate);
     rb_define_method(cItem, "initialize", item_initialize, 2);
+    rb_define_method(cItem, "==", item_eq, 1);
+    rb_define_method(cItem, "name", item_name_m, 0);
+    rb_define_method(cItem, "description", item_description_m, 0);
 
     cMenu = rb_define_class_under(mCurses, "Menu", rb_cData);
     rb_define_alloc_func(cMenu, menu_s_allocate);
@@ -3806,6 +3966,10 @@ Init_curses(void)
     rb_define_method(cMenu, "post", menu_post, 0);
     rb_define_method(cMenu, "unpost", menu_unpost, 0);
     rb_define_method(cMenu, "driver", menu_driver_m, 1);
+    rb_define_method(cMenu, "current_item", menu_current_item, 0);
+    rb_define_method(cMenu, "item_count", menu_item_count, 0);
+    rb_define_method(cMenu, "items", menu_get_items, 0);
+    rb_define_method(cMenu, "items=", menu_set_items, 1);
 #endif
 
 #define rb_curses_define_error(c) do { \
