@@ -30,7 +30,7 @@ Or
 
 ## Documentation
 
-See [http://www.rubydoc.info/gems/curses](http://www.rubydoc.info/gems/curses).
+See [https://www.rubydoc.info/gems/curses](https://www.rubydoc.info/gems/curses).
 
 ## Developers
 
