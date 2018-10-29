@@ -11,7 +11,7 @@ end
 menu = Curses::Menu.new([
   Curses::Item.new("Apple", "Red fruit"),
   Curses::Item.new("Orange", "Orange fruit"),
-  Curses::Item.new("Banana", "Yello fruit")
+  Curses::Item.new("Banana", "Yellow fruit")
 ])
 menu.post
 
