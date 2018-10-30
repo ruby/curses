@@ -3173,6 +3173,7 @@ menu_free(void *p)
     if (menup->menu) free_menu(menup->menu);
     xfree(items);
     menup->menu = 0;
+    menup->items = Qnil;
     xfree(menup);
 }
 
@@ -3302,28 +3303,6 @@ menu_driver_m(VALUE obj, VALUE command)
 }
 
 /*
- * Document-method: Curses::Menu#current_item
- *
- * call-seq:
- *   current_item
- *
- * Returns the current item.
- */
-static VALUE
-menu_current_item(VALUE obj)
-{
-    struct menudata *menup;
-    ITEM *item;
-
-    GetMENU(obj, menup);
-    item = current_item(menup->menu);
-    if (item == NULL) {
-	return Qnil;
-    }
-    return item_new(item);
-}
-
-/*
  * Document-method: Curses::Menu#item_count
  *
  * call-seq:
@@ -3403,6 +3382,48 @@ menu_set_items(VALUE obj, VALUE items)
     xfree(old_items);
     menup->items = rb_ary_dup(items);
     return items;
+}
+
+/*
+ * Document-method: Curses::Menu#current_item
+ *
+ * call-seq:
+ *   current_item
+ *
+ * Returns the current item.
+ */
+static VALUE
+menu_get_current_item(VALUE obj)
+{
+    struct menudata *menup;
+    ITEM *item;
+
+    GetMENU(obj, menup);
+    item = current_item(menup->menu);
+    if (item == NULL) {
+	return Qnil;
+    }
+    return item_new(item);
+}
+
+/*
+ * Document-method: Curses::Menu#current_item=
+ *
+ * call-seq:
+ *   current_item=(item)
+ *
+ * Sets the current item.
+ */
+static VALUE
+menu_set_current_item(VALUE obj, VALUE item)
+{
+    struct menudata *menup;
+    struct itemdata *itemp;
+
+    GetMENU(obj, menup);
+    GetITEM(item, itemp);
+    set_current_item(menup->menu, itemp->item);
+    return item;
 }
 
 #endif /* HAVE_MENU */
@@ -3966,10 +3987,11 @@ Init_curses(void)
     rb_define_method(cMenu, "post", menu_post, 0);
     rb_define_method(cMenu, "unpost", menu_unpost, 0);
     rb_define_method(cMenu, "driver", menu_driver_m, 1);
-    rb_define_method(cMenu, "current_item", menu_current_item, 0);
     rb_define_method(cMenu, "item_count", menu_item_count, 0);
     rb_define_method(cMenu, "items", menu_get_items, 0);
     rb_define_method(cMenu, "items=", menu_set_items, 1);
+    rb_define_method(cMenu, "current_item", menu_get_current_item, 0);
+    rb_define_method(cMenu, "current_item=", menu_set_current_item, 1);
 #endif
 
 #define rb_curses_define_error(c) do { \
