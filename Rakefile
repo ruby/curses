@@ -28,11 +28,11 @@ namespace :build do
         sh "nmake -f vcwin32.mak clean all WIDE=Y DLL=Y"
         cp %w[pdcurses.dll pdcurses.lib], "../../#{RUBY_PLATFORM}/PDCurses"
       else
-        sh "make -f mingwin32.mak clean all WIDE=Y DLL=Y"
-        cp "pdcurses.dll", "../../x86-mingw32/PDCurses"
+        sh "make -f mingwin32.mak clean all WIDE=Y DLL=N"
+        cp "pdcurses.a", "../../x86-mingw32/PDCurses/libpdcurses.a"
 
-        sh "make -f mingwin32.mak clean all _w64=1 WIDE=Y DLL=Y"
-        cp "pdcurses.dll", "../../x64-mingw32/PDCurses"
+        sh "make -f mingwin32.mak clean all _w64=1 WIDE=Y DLL=N"
+        cp "pdcurses.a", "../../x64-mingw32/PDCurses/libpdcurses.a"
       end
     end
   end
@@ -71,14 +71,16 @@ Rake::ExtensionTask.new(spec.name, spec) do |ext|
     'x64-mingw32' => '--with-curses-lib=' +
       File.expand_path("vendor/x64-mingw32/PDCurses", __dir__)
   }
-  ext.cross_compiling do |_spec|
-    bin_file = "vendor/#{_spec.platform}/PDCurses/pdcurses.dll"
-    _spec.files += [bin_file]
-    stage_file = "#{ext.tmp_dir}/#{_spec.platform}/stage/#{bin_file}"
-    stage_dir = File.dirname(stage_file)
-    directory stage_dir
-    file stage_file => [stage_dir, bin_file] do
-      cp bin_file, stage_file
+  if $mswin
+    ext.cross_compiling do |_spec|
+      bin_file = "vendor/#{_spec.platform}/PDCurses/pdcurses.dll"
+      _spec.files += [bin_file]
+      stage_file = "#{ext.tmp_dir}/#{_spec.platform}/stage/#{bin_file}"
+      stage_dir = File.dirname(stage_file)
+      directory stage_dir
+      file stage_file => [stage_dir, bin_file] do
+        cp bin_file, stage_file
+      end
     end
   end
 end
