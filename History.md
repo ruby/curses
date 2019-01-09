@@ -1,3 +1,13 @@
+### 1.2.6 / 2019-01-09
+
+New features:
+
+* Add Curses::Menu and Curses::Item.
+
+Bug fixes:
+
+* Link PDCurses statically to avoid LoadError on mingw.
+
 ### 1.2.5 / 2018-10-16
 
 New features:
