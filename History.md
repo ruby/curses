@@ -7,6 +7,8 @@ New features:
 Bug fixes:
 
 * Link PDCurses statically to avoid LoadError on mingw.
+* Use https for documentation link.  Pull request #43 by stomar.
+* Fix typo in example code.  Pull request #44 by stomar.
 
 ### 1.2.5 / 2018-10-16
 
