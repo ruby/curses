@@ -1,6 +1,6 @@
 Gem::Specification.new { |s|
   s.name = "curses"
-  s.version = "1.2.5"
+  s.version = "1.2.6"
   s.author = ["Shugo Maeda", 'Eric Hodel']
   s.email = ["shugo@ruby-lang.org", 'drbrain@segment7.net']
   s.homepage = "https://github.com/ruby/curses"
