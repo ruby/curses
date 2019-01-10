@@ -3519,6 +3519,19 @@ keyboard_uint_chr(unsigned int ch)
     return rb_enc_uint_chr(ch, keyboard_encoding);
 }
 
+#if defined(HAVE_GET_WCH) || defined(HAVE_WGET_WCH)
+static VALUE
+key_code_value(unsigned int ch)
+{
+#ifdef CTL_FSLASH
+    if (ch == CTL_FSLASH) {
+	return keyboard_uint_chr(0x1F);
+    }
+#endif
+    return UINT2NUM(ch);
+}
+#endif
+
 #ifdef HAVE_GET_WCH
 struct get_wch_arg {
     int retval;
@@ -3557,7 +3570,7 @@ curses_get_char(VALUE obj)
     case OK:
 	return keyboard_uint_chr(arg.ch);
     case KEY_CODE_YES:
-	return UINT2NUM(arg.ch);
+	return key_code_value(arg.ch);
     }
     return Qnil;
 #else
@@ -3619,7 +3632,7 @@ window_get_char(VALUE obj)
     case OK:
 	return keyboard_uint_chr(arg.ch);
     case KEY_CODE_YES:
-	return UINT2NUM(arg.ch);
+	return key_code_value(arg.ch);
     }
     return Qnil;
 #else
