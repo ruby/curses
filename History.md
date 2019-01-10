@@ -1,3 +1,9 @@
+### 1.2.7 / 2019-01-10
+
+Bug fixes:
+
+* Add curses.so for Ruby 2.5/2.6 on x86-mingw32.
+
 ### 1.2.6 / 2019-01-09
 
 New features:
