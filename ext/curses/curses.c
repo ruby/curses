@@ -3215,6 +3215,7 @@ menu_initialize(VALUE obj, VALUE items)
     struct menudata *menup;
     ITEM **menu_items;
     int i;
+    ID id_new;
 
     Check_Type(items, T_ARRAY);
     curses_init_screen();
@@ -3222,19 +3223,25 @@ menu_initialize(VALUE obj, VALUE items)
     if (menup->menu) {
 	rb_raise(rb_eRuntimeError, "already initialized menu");
     }
+    menup->items = rb_ary_new();
     menu_items = ALLOC_N(ITEM *, RARRAY_LEN(items) + 1);
+    CONST_ID(id_new, "new");
     for (i = 0; i < RARRAY_LEN(items); i++) {
+	VALUE item = RARRAY_AREF(items, i);
 	struct itemdata *itemp;
 
-	GetITEM(RARRAY_AREF(items, i), itemp);
+	if (RB_TYPE_P(item, T_ARRAY)) {
+	    item = rb_apply(cItem, id_new, item);
+	}
+	GetITEM(item, itemp);
 	menu_items[i] = itemp->item;
+	rb_ary_push(menup->items, item);
     }
     menu_items[RARRAY_LEN(items)] = NULL;
     menup->menu = new_menu(menu_items);
     if (menup->menu == NULL) {
 	check_curses_error(errno);
     }
-    menup->items = rb_ary_dup(items);
 
     return obj;
 }

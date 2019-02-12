@@ -9,9 +9,9 @@ at_exit do
 end
 
 menu = Curses::Menu.new([
-  Curses::Item.new("Apple", "Red fruit"),
-  Curses::Item.new("Orange", "Orange fruit"),
-  Curses::Item.new("Banana", "Yellow fruit")
+  ["Apple", "Red fruit"],
+  ["Orange", "Orange fruit"],
+  ["Banana", "Yellow fruit"]
 ])
 menu.post
 
