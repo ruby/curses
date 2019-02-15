@@ -5,7 +5,7 @@ Curses.cbreak
 Curses.noecho
 Curses.stdscr.keypad = true
 at_exit do
-  Curses.cloes_screen
+  Curses.close_screen
 end
 
 menu = Curses::Menu.new([
