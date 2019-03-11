@@ -23,15 +23,15 @@ namespace :build do
     mkdir_p "vendor/#{RUBY_PLATFORM}/PDCurses" if $mswin
     mkdir_p "vendor/x86-mingw32/PDCurses"
     mkdir_p "vendor/x64-mingw32/PDCurses"
-    chdir "vendor/PDCurses/win32" do
+    chdir "vendor/PDCurses/wincon" do
       if $mswin
-        sh "nmake -f vcwin32.mak clean all WIDE=Y DLL=Y"
+        sh "nmake -f Makefile.vc clean all WIDE=Y DLL=Y"
         cp %w[pdcurses.dll pdcurses.lib], "../../#{RUBY_PLATFORM}/PDCurses"
       else
-        sh "make -f mingwin32.mak clean all WIDE=Y DLL=N"
+        sh "make -f Makefile.mng clean all WIDE=Y DLL=N"
         cp "pdcurses.a", "../../x86-mingw32/PDCurses/libpdcurses.a"
 
-        sh "make -f mingwin32.mak clean all _w64=1 WIDE=Y DLL=N"
+        sh "make -f Makefile.mng clean all _w64=1 WIDE=Y DLL=N"
         cp "pdcurses.a", "../../x64-mingw32/PDCurses/libpdcurses.a"
       end
     end
@@ -41,9 +41,12 @@ end
 namespace :clean do
   desc "Clean PDCurses"
   task :pdcurses do
-    chdir "vendor/PDCurses/win32" do
-      sh "nmake -f vcwin32.mak clean" if $mswin
-      sh "make -f mingwin32.mak clean _linux_w64=1"
+    chdir "vendor/PDCurses/wincon" do
+      if $mswin
+        sh "nmake -f Makefile.vc clean"
+      else
+        sh "make -f Makefile.mng clean _linux_w64=1"
+      end
     end
   end
 end
