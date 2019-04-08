@@ -61,6 +61,16 @@
 # include <menu.h>
 #endif
 
+#if defined(HAVE_NCURSESW_FORM_H)
+# include <ncursesw/form.h>
+#elif defined(HAVE_NCURSES_FORM_H)
+# include <ncurses/form.h>
+#elif defined(HAVE_CURSES_FORM_H)
+# include <curses/form.h>
+#elif defined(HAVE_FORM_H)
+# include <form.h>
+#endif
+
 #ifdef HAVE_INIT_COLOR
 # define USE_COLOR 1
 #endif
@@ -83,6 +93,10 @@ static VALUE cMouseEvent;
 #ifdef HAVE_MENU
 static VALUE cItem;
 static VALUE cMenu;
+#endif
+#ifdef HAVE_FORM
+static VALUE cField;
+static VALUE cForm;
 #endif
 static VALUE eError;
 static VALUE eSystemError;
@@ -227,7 +241,7 @@ window_memsize(const void *p)
     const struct windata *winp = p;
     size_t size = sizeof(*winp);
     if (!winp) return 0;
-    if (winp->window && winp->window != stdscr) size += sizeof(winp->window);
+    if (winp->window && winp->window != stdscr) size += sizeof(*winp->window);
     return size;
 }
 
@@ -1452,7 +1466,7 @@ curses_mousedata_memsize(const void *p)
     const struct mousedata *mdata = p;
     size_t size = sizeof(*mdata);
     if (!mdata) return 0;
-    if (mdata->mevent) size += sizeof(mdata->mevent);
+    if (mdata->mevent) size += sizeof(*mdata->mevent);
     return size;
 }
 
@@ -3049,7 +3063,7 @@ item_memsize(const void *p)
     const struct itemdata *itemp = p;
     size_t size = sizeof(*itemp);
     if (!itemp) return 0;
-    if (itemp->item) size += sizeof(itemp->item);
+    if (itemp->item) size += sizeof(*itemp->item);
     return size;
 }
 
@@ -3183,7 +3197,7 @@ menu_memsize(const void *p)
     const struct menudata *menup = p;
     size_t size = sizeof(*menup);
     if (!menup) return 0;
-    if (menup->menu) size += sizeof(menup->menu);
+    if (menup->menu) size += sizeof(*menup->menu);
     return size;
 }
 
@@ -3205,7 +3219,7 @@ menu_s_allocate(VALUE class)
  * Document-method: Curses::Menu.new
  *
  * call-seq:
- *   new(name, description)
+ *   new(items)
  *
  * Construct a new Curses::Menu.
  */
@@ -3434,6 +3448,380 @@ menu_set_current_item(VALUE obj, VALUE item)
 }
 
 #endif /* HAVE_MENU */
+
+#ifdef HAVE_FORM
+struct fielddata {
+    FIELD *field;
+};
+
+static void
+no_field(void)
+{
+    rb_raise(rb_eRuntimeError, "already deleted field");
+}
+
+#define GetFIELD(obj, fieldp) do {\
+    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
+	rb_raise(rb_eSecurityError, "Insecure: operation on untainted field");\
+    TypedData_Get_Struct((obj), struct fielddata, &fielddata_type, (fieldp));\
+    if ((fieldp)->field == 0) no_field();\
+} while (0)
+
+static void
+field_free(void *p)
+{
+    struct fielddata *fieldp = p;
+    if (fieldp->field) free_field(fieldp->field);
+    fieldp->field = 0;
+    xfree(fieldp);
+}
+
+static size_t
+field_memsize(const void *p)
+{
+    const struct fielddata *fieldp = p;
+    size_t size = sizeof(*fieldp);
+    if (!fieldp) return 0;
+    if (fieldp->field) size += sizeof(*fieldp->field);
+    return size;
+}
+
+static const rb_data_type_t fielddata_type = {
+    "fielddata",
+    {0, field_free, field_memsize,}
+};
+
+/* returns a Curses::Menu object */
+static VALUE
+field_s_allocate(VALUE class)
+{
+    struct fielddata *fieldp;
+
+    return TypedData_Make_Struct(class, struct fielddata, &fielddata_type, fieldp);
+}
+
+/*
+ * Document-method: Curses::Field.new
+ *
+ * call-seq:
+ *   new(height, width, toprow, leftcol, offscreen, nbuffers)
+ *
+ * Construct a new Curses::Field.
+ */
+static VALUE
+field_initialize(VALUE obj, VALUE height, VALUE width,
+		 VALUE toprow, VALUE leftcol, VALUE offscreen, VALUE nbuffers)
+{
+    struct fielddata *fieldp;
+
+    curses_init_screen();
+    TypedData_Get_Struct(obj, struct fielddata, &fielddata_type, fieldp);
+    if (fieldp->field) {
+	rb_raise(rb_eRuntimeError, "already initialized field");
+    }
+    fieldp->field = new_field(NUM2INT(height), NUM2INT(width),
+			      NUM2INT(toprow), NUM2INT(leftcol),
+			      NUM2INT(offscreen), NUM2INT(nbuffers));
+    if (fieldp->field == NULL) {
+	check_curses_error(errno);
+    }
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Field#set_buffer
+ *
+ * call-seq:
+ *   set_buffer(buf, value)
+ *
+ * Set the numbered buffer of the field.
+ */
+static VALUE
+field_set_buffer(VALUE obj, VALUE buf, VALUE value)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    value = rb_str_export_to_enc(value, terminal_encoding);
+    set_field_buffer(fieldp->field, NUM2INT(buf), StringValueCStr(value));
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Field#buffer
+ *
+ * call-seq:
+ *   buffer(buf)
+ *
+ * Get the numbered buffer of the field.
+ */
+static VALUE
+field_buffer_m(VALUE obj, VALUE buf)
+{
+    struct fielddata *fieldp;
+    char *s;
+
+    GetFIELD(obj, fieldp);
+    s = field_buffer(fieldp->field, NUM2INT(buf));
+    return rb_external_str_new_with_enc(s, strlen(s), terminal_encoding);
+}
+
+/*
+ * Document-method: Curses::Field#set_fore
+ *
+ * call-seq:
+ *   set_fore(attr)
+ *
+ * Set the foreground attribute of the field.
+ */
+static VALUE
+field_set_fore(VALUE obj, VALUE attr)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    set_field_fore(fieldp->field, NUM2CHTYPE(attr));
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Field#fore
+ *
+ * call-seq:
+ *   fore
+ *
+ * Get the foreground attribute of the field.
+ */
+static VALUE
+field_get_fore(VALUE obj)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    return CHTYPE2NUM(field_fore(fieldp->field));
+}
+
+/*
+ * Document-method: Curses::Field#set_back
+ *
+ * call-seq:
+ *   set_back(attr)
+ *
+ * Set the background attribute of the field.
+ */
+static VALUE
+field_set_back(VALUE obj, VALUE attr)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    set_field_back(fieldp->field, NUM2CHTYPE(attr));
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Field#back
+ *
+ * call-seq:
+ *   back
+ *
+ * Get the background attribute of the field.
+ */
+static VALUE
+field_get_back(VALUE obj)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    return CHTYPE2NUM(field_back(fieldp->field));
+}
+
+struct formdata {
+    FORM *form;
+    VALUE fields;
+};
+
+static void
+no_form(void)
+{
+    rb_raise(rb_eRuntimeError, "already deleted form");
+}
+
+#define GetFORM(obj, formp) do {\
+    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
+	rb_raise(rb_eSecurityError, "Insecure: operation on untainted form");\
+    TypedData_Get_Struct((obj), struct formdata, &formdata_type, (formp));\
+    if ((formp)->form == 0) no_form();\
+} while (0)
+
+static void
+form_gc_mark(void *p)
+{
+    struct formdata *formp = p;
+
+    rb_gc_mark(formp->fields);
+}    
+
+static void
+form_free(void *p)
+{
+    struct formdata *formp = p;
+    FIELD **fields = form_fields(formp->form);
+    if (formp->form) free_form(formp->form);
+    xfree(fields);
+    formp->form = 0;
+    formp->fields = Qnil;
+    xfree(formp);
+}
+
+static size_t
+form_memsize(const void *p)
+{
+    const struct formdata *formp = p;
+    size_t size = sizeof(*formp);
+    if (!formp) return 0;
+    if (formp->form) size += sizeof(*formp->form);
+    return size;
+}
+
+static const rb_data_type_t formdata_type = {
+    "formdata",
+    {form_gc_mark, form_free, form_memsize,}
+};
+
+/* returns a Curses::Form object */
+static VALUE
+form_s_allocate(VALUE class)
+{
+    struct formdata *formp;
+
+    return TypedData_Make_Struct(class, struct formdata, &formdata_type, formp);
+}
+
+/*
+ * Document-method: Curses::Form.new
+ *
+ * call-seq:
+ *   new(fields)
+ *
+ * Construct a new Curses::Form.
+ */
+static VALUE
+form_initialize(VALUE obj, VALUE fields)
+{
+    struct formdata *formp;
+    FIELD **form_fields;
+    int i;
+
+    Check_Type(fields, T_ARRAY);
+    curses_init_screen();
+    TypedData_Get_Struct(obj, struct formdata, &formdata_type, formp);
+    if (formp->form) {
+	rb_raise(rb_eRuntimeError, "already initialized form");
+    }
+    formp->fields = rb_ary_new();
+    form_fields = ALLOC_N(FIELD *, RARRAY_LEN(fields) + 1);
+    for (i = 0; i < RARRAY_LEN(fields); i++) {
+	VALUE field = RARRAY_AREF(fields, i);
+	struct fielddata *fieldp;
+
+	GetFIELD(field, fieldp);
+	form_fields[i] = fieldp->field;
+	rb_ary_push(formp->fields, field);
+    }
+    form_fields[RARRAY_LEN(fields)] = NULL;
+    formp->form = new_form(form_fields);
+    if (formp->form == NULL) {
+	check_curses_error(errno);
+    }
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Form#post
+ *
+ * call-seq:
+ *   post
+ *
+ * Post the form.
+ */
+static VALUE
+form_post(VALUE obj)
+{
+    struct formdata *formp;
+    int error;
+
+    GetFORM(obj, formp);
+    error = post_form(formp->form);
+    check_curses_error(error);
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Form#unpost
+ *
+ * call-seq:
+ *   unpost
+ *
+ * Unpost the form.
+ */
+static VALUE
+form_unpost(VALUE obj)
+{
+    struct formdata *formp;
+    int error;
+
+    GetFORM(obj, formp);
+    error = unpost_form(formp->form);
+    check_curses_error(error);
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Form#driver
+ *
+ * call-seq:
+ *   driver(command)
+ *
+ * Perform the command on the form.
+ */
+static VALUE
+form_driver_m(VALUE obj, VALUE command)
+{
+    struct formdata *formp;
+    int error, c;
+
+    GetFORM(obj, formp);
+    if (FIXNUM_P(command)) {
+	c = NUM2INT(command);
+    }
+    else {
+	ID id_ord;
+
+	StringValue(command);
+	CONST_ID(id_ord, "ord");
+	c = NUM2INT(rb_funcall(command, id_ord, 0));
+    }
+#ifdef HAVE_FORM_DRIVER_W
+    error = form_driver_w(formp->form,
+			  FIXNUM_P(command) ? KEY_CODE_YES : OK,
+			  c);
+#else
+    error = form_driver(formp->form, c);
+#endif
+    check_curses_error(error);
+
+    return obj;
+}
+
+#endif /* HAVE_FORM */
 
 /*
  * Document-method: Curses.keyboard_encoding
@@ -4012,6 +4400,27 @@ Init_curses(void)
     rb_define_method(cMenu, "items=", menu_set_items, 1);
     rb_define_method(cMenu, "current_item", menu_get_current_item, 0);
     rb_define_method(cMenu, "current_item=", menu_set_current_item, 1);
+#endif
+
+#ifdef HAVE_MENU
+    cField = rb_define_class_under(mCurses, "Field", rb_cData);
+    rb_define_alloc_func(cField, field_s_allocate);
+    rb_define_method(cField, "initialize", field_initialize, 6);
+    rb_define_method(cField, "set_buffer", field_set_buffer, 2);
+    rb_define_method(cField, "buffer", field_buffer_m, 1);
+    rb_define_method(cField, "set_fore", field_set_fore, 1);
+    rb_define_method(cField, "fore=", field_set_fore, 1);
+    rb_define_method(cField, "fore", field_get_fore, 0);
+    rb_define_method(cField, "set_back", field_set_back, 1);
+    rb_define_method(cField, "back=", field_set_back, 1);
+    rb_define_method(cField, "back", field_get_back, 0);
+
+    cForm = rb_define_class_under(mCurses, "Form", rb_cData);
+    rb_define_alloc_func(cForm, form_s_allocate);
+    rb_define_method(cForm, "initialize", form_initialize, 1);
+    rb_define_method(cForm, "post", form_post, 0);
+    rb_define_method(cForm, "unpost", form_unpost, 0);
+    rb_define_method(cForm, "driver", form_driver_m, 1);
 #endif
 
 #define rb_curses_define_error(c) do { \
@@ -5519,6 +5928,70 @@ Init_curses(void)
     rb_curses_define_const(REQ_BACK_PATTERN);
     rb_curses_define_const(REQ_NEXT_MATCH);
     rb_curses_define_const(REQ_PREV_MATCH);
+#endif
+
+#ifdef HAVE_MENU
+    rb_curses_define_const(REQ_NEXT_PAGE);
+    rb_curses_define_const(REQ_PREV_PAGE);
+    rb_curses_define_const(REQ_FIRST_PAGE);
+    rb_curses_define_const(REQ_LAST_PAGE);
+
+    rb_curses_define_const(REQ_NEXT_FIELD);
+    rb_curses_define_const(REQ_PREV_FIELD);
+    rb_curses_define_const(REQ_FIRST_FIELD);
+    rb_curses_define_const(REQ_LAST_FIELD);
+    rb_curses_define_const(REQ_SNEXT_FIELD);
+    rb_curses_define_const(REQ_SPREV_FIELD);
+    rb_curses_define_const(REQ_SFIRST_FIELD);
+    rb_curses_define_const(REQ_SLAST_FIELD);
+    rb_curses_define_const(REQ_LEFT_FIELD);
+    rb_curses_define_const(REQ_RIGHT_FIELD);
+    rb_curses_define_const(REQ_UP_FIELD);
+    rb_curses_define_const(REQ_DOWN_FIELD);
+
+    rb_curses_define_const(REQ_NEXT_CHAR);
+    rb_curses_define_const(REQ_PREV_CHAR);
+    rb_curses_define_const(REQ_NEXT_LINE);
+    rb_curses_define_const(REQ_PREV_LINE);
+    rb_curses_define_const(REQ_NEXT_WORD);
+    rb_curses_define_const(REQ_PREV_WORD);
+    rb_curses_define_const(REQ_BEG_FIELD);
+    rb_curses_define_const(REQ_END_FIELD);
+    rb_curses_define_const(REQ_BEG_LINE);
+    rb_curses_define_const(REQ_END_LINE);
+    rb_curses_define_const(REQ_LEFT_CHAR);
+    rb_curses_define_const(REQ_RIGHT_CHAR);
+    rb_curses_define_const(REQ_UP_CHAR);
+    rb_curses_define_const(REQ_DOWN_CHAR);
+
+    rb_curses_define_const(REQ_NEW_LINE);
+    rb_curses_define_const(REQ_INS_CHAR);
+    rb_curses_define_const(REQ_INS_LINE);
+    rb_curses_define_const(REQ_DEL_CHAR);
+    rb_curses_define_const(REQ_DEL_PREV);
+    rb_curses_define_const(REQ_DEL_LINE);
+    rb_curses_define_const(REQ_DEL_WORD);
+    rb_curses_define_const(REQ_CLR_EOL);
+    rb_curses_define_const(REQ_CLR_EOF);
+    rb_curses_define_const(REQ_CLR_FIELD);
+    rb_curses_define_const(REQ_OVL_MODE);
+    rb_curses_define_const(REQ_INS_MODE);
+    rb_curses_define_const(REQ_SCR_FLINE);
+    rb_curses_define_const(REQ_SCR_BLINE);
+    rb_curses_define_const(REQ_SCR_FPAGE);
+    rb_curses_define_const(REQ_SCR_BPAGE);
+    rb_curses_define_const(REQ_SCR_FHPAGE);
+    rb_curses_define_const(REQ_SCR_BHPAGE);
+    rb_curses_define_const(REQ_SCR_FCHAR);
+    rb_curses_define_const(REQ_SCR_BCHAR);
+    rb_curses_define_const(REQ_SCR_HFLINE);
+    rb_curses_define_const(REQ_SCR_HBLINE);
+    rb_curses_define_const(REQ_SCR_HFHALF);
+    rb_curses_define_const(REQ_SCR_HBHALF);
+
+    rb_curses_define_const(REQ_VALIDATION);
+    rb_curses_define_const(REQ_NEXT_CHOICE);
+    rb_curses_define_const(REQ_PREV_CHOICE);
 #endif
 #undef rb_curses_define_const
 }

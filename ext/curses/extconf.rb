@@ -150,6 +150,16 @@ if header_library
     $defs << '-DHAVE_MENU'
   end
 
+  if (have_header("ncursesw/form.h") ||
+      have_header("ncurses/form.h") ||
+      have_header("curses/form.h") ||
+      have_header("form.h")) &&
+      (have_library("formw", "new_form") ||
+       have_library("form", "new_form"))
+    $defs << '-DHAVE_FORM'
+    have_func("form_driver_w")
+  end
+
   if RUBY_VERSION >= '2.1'
     create_header
     create_makefile("curses")
