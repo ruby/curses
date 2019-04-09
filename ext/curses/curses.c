@@ -6515,7 +6515,9 @@ Init_curses(void)
     rb_curses_define_const(O_IGNORECASE);
     rb_curses_define_const(O_SHOWMATCH);
     rb_curses_define_const(O_NONCYCLIC);
+#ifdef O_MOUSE_MENU
     rb_curses_define_const(O_MOUSE_MENU);
+#endif
     rb_curses_define_const(O_SELECTABLE);
 
     rb_curses_define_const(REQ_LEFT_ITEM);
