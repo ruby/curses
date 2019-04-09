@@ -3153,6 +3153,83 @@ item_description_m(VALUE obj)
     return rb_external_str_new_with_enc(desc, strlen(desc), terminal_encoding);
 }
 
+/*
+ * Document-method: Curses::Item#set_opts
+ *
+ * call-seq:
+ *   set_opts(opts)
+ *
+ * Set the option bits of the item.
+ */
+static VALUE
+item_set_opts(VALUE obj, VALUE opts)
+{
+    struct itemdata *itemp;
+    int error;
+
+    GetITEM(obj, itemp);
+    error = set_item_opts(itemp->item, NUM2INT(opts));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Item#opts_on
+ *
+ * call-seq:
+ *   opts_on(opts)
+ *
+ * Turn on the option bits of the item.
+ */
+static VALUE
+item_opts_on_m(VALUE obj, VALUE opts)
+{
+    struct itemdata *itemp;
+    int error;
+
+    GetITEM(obj, itemp);
+    error = item_opts_on(itemp->item, NUM2INT(opts));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Item#opts_off
+ *
+ * call-seq:
+ *   opts_off(opts)
+ *
+ * Turn off the option bits of the item.
+ */
+static VALUE
+item_opts_off_m(VALUE obj, VALUE opts)
+{
+    struct itemdata *itemp;
+    int error;
+
+    GetITEM(obj, itemp);
+    error = item_opts_off(itemp->item, NUM2INT(opts));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Item#opts
+ *
+ * call-seq:
+ *   opts
+ *
+ * Get the current option bits of the item.
+ */
+static VALUE
+item_opts_m(VALUE obj, VALUE opts)
+{
+    struct itemdata *itemp;
+
+    GetITEM(obj, itemp);
+    return INT2NUM(item_opts(itemp->item));
+}
+
 struct menudata {
     MENU *menu;
     VALUE items;
@@ -3507,6 +3584,121 @@ menu_scale(VALUE obj)
     return rb_assoc_new(INT2NUM(rows), INT2NUM(columns));
 }
 
+/*
+ * Document-method: Curses::Menu#set_format
+ *
+ * call-seq:
+ *   set_format(rows, cols)
+ *
+ * Set the maximum size of the menu.
+ */
+static VALUE
+menu_set_format(VALUE obj, VALUE rows, VALUE cols)
+{
+    struct menudata *menup;
+    int error;
+
+    GetMENU(obj, menup);
+    error = set_menu_format(menup->menu, NUM2INT(rows), NUM2INT(cols));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#format
+ *
+ * call-seq:
+ *   format
+ *
+ * Get the maximum size of the menu.
+ */
+static VALUE
+menu_format_m(VALUE obj)
+{
+    struct menudata *menup;
+    int rows, cols;
+
+    GetMENU(obj, menup);
+    menu_format(menup->menu, &rows, &cols);
+    return rb_assoc_new(INT2NUM(rows), INT2NUM(cols));
+}
+
+/*
+ * Document-method: Curses::Menu#set_opts
+ *
+ * call-seq:
+ *   set_opts(opts)
+ *
+ * Set the option bits of the menu.
+ */
+static VALUE
+menu_set_opts(VALUE obj, VALUE opts)
+{
+    struct menudata *menup;
+    int error;
+
+    GetMENU(obj, menup);
+    error = set_menu_opts(menup->menu, NUM2INT(opts));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#opts_on
+ *
+ * call-seq:
+ *   opts_on(opts)
+ *
+ * Turn on the option bits of the menu.
+ */
+static VALUE
+menu_opts_on_m(VALUE obj, VALUE opts)
+{
+    struct menudata *menup;
+    int error;
+
+    GetMENU(obj, menup);
+    error = menu_opts_on(menup->menu, NUM2INT(opts));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#opts_off
+ *
+ * call-seq:
+ *   opts_off(opts)
+ *
+ * Turn off the option bits of the menu.
+ */
+static VALUE
+menu_opts_off_m(VALUE obj, VALUE opts)
+{
+    struct menudata *menup;
+    int error;
+
+    GetMENU(obj, menup);
+    error = menu_opts_off(menup->menu, NUM2INT(opts));
+    check_curses_error(error);
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#opts
+ *
+ * call-seq:
+ *   opts
+ *
+ * Get the current option bits of the menu.
+ */
+static VALUE
+menu_opts_m(VALUE obj, VALUE opts)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    return INT2NUM(menu_opts(menup->menu));
+}
 #endif /* HAVE_MENU */
 
 #ifdef HAVE_FORM
@@ -4763,6 +4955,10 @@ Init_curses(void)
     rb_define_method(cItem, "==", item_eq, 1);
     rb_define_method(cItem, "name", item_name_m, 0);
     rb_define_method(cItem, "description", item_description_m, 0);
+    rb_define_method(cItem, "set_opts", item_set_opts, 1);
+    rb_define_method(cItem, "opts_on", item_opts_on_m, 1);
+    rb_define_method(cItem, "opts_off", item_opts_off_m, 1);
+    rb_define_method(cItem, "opts", item_opts_m, 0);
 
     cMenu = rb_define_class_under(mCurses, "Menu", rb_cData);
     rb_define_alloc_func(cMenu, menu_s_allocate);
@@ -4778,9 +4974,15 @@ Init_curses(void)
     rb_define_method(cMenu, "set_win", menu_set_win, 1);
     rb_define_method(cMenu, "set_sub", menu_set_sub, 1);
     rb_define_method(cMenu, "scale", menu_scale, 0);
+    rb_define_method(cMenu, "set_format", menu_set_format, 2);
+    rb_define_method(cMenu, "format", menu_format_m, 0);
+    rb_define_method(cMenu, "set_opts", menu_set_opts, 1);
+    rb_define_method(cMenu, "opts_on", menu_opts_on_m, 1);
+    rb_define_method(cMenu, "opts_off", menu_opts_off_m, 1);
+    rb_define_method(cMenu, "opts", menu_opts_m, 0);
 #endif
 
-#ifdef HAVE_MENU
+#ifdef HAVE_FORM
     cField = rb_define_class_under(mCurses, "Field", rb_cData);
     rb_define_alloc_func(cField, field_s_allocate);
     rb_define_method(cField, "initialize", field_initialize, 6);
@@ -6307,6 +6509,15 @@ Init_curses(void)
 #endif
 
 #ifdef HAVE_MENU
+    rb_curses_define_const(O_ONEVALUE);
+    rb_curses_define_const(O_SHOWDESC);
+    rb_curses_define_const(O_ROWMAJOR);
+    rb_curses_define_const(O_IGNORECASE);
+    rb_curses_define_const(O_SHOWMATCH);
+    rb_curses_define_const(O_NONCYCLIC);
+    rb_curses_define_const(O_MOUSE_MENU);
+    rb_curses_define_const(O_SELECTABLE);
+
     rb_curses_define_const(REQ_LEFT_ITEM);
     rb_curses_define_const(REQ_RIGHT_ITEM);
     rb_curses_define_const(REQ_UP_ITEM);
