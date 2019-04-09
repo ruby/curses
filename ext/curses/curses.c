@@ -3447,6 +3447,66 @@ menu_set_current_item(VALUE obj, VALUE item)
     return item;
 }
 
+/*
+ * Document-method: Curses::Menu#set_win
+ *
+ * call-seq:
+ *   set_win=(win)
+ *
+ * Set the window of the menu.
+ */
+static VALUE
+menu_set_win(VALUE obj, VALUE win)
+{
+    struct menudata *menup;
+    struct windata *winp;
+
+    GetMENU(obj, menup);
+    GetWINDOW(win, winp);
+    set_menu_win(menup->menu, winp->window);
+    return win;
+}
+
+/*
+ * Document-method: Curses::Menu#set_sub
+ *
+ * call-seq:
+ *   set_sub=(win)
+ *
+ * Set the subwindow of the menu.
+ */
+static VALUE
+menu_set_sub(VALUE obj, VALUE win)
+{
+    struct menudata *menup;
+    struct windata *winp;
+
+    GetMENU(obj, menup);
+    GetWINDOW(win, winp);
+    set_menu_sub(menup->menu, winp->window);
+    return win;
+}
+
+/*
+ * Document-method: Curses::Menu#scale
+ *
+ * call-seq:
+ *   scale
+ *
+ * Return the minimum rows and columns required for the subwindow of the menu.
+ */
+static VALUE
+menu_scale(VALUE obj)
+{
+    struct menudata *menup;
+    int error, rows, columns;
+
+    GetMENU(obj, menup);
+    error = scale_menu(menup->menu, &rows, &columns);
+    check_curses_error(error);
+    return rb_assoc_new(INT2NUM(rows), INT2NUM(columns));
+}
+
 #endif /* HAVE_MENU */
 
 #ifdef HAVE_FORM
@@ -3994,6 +4054,66 @@ form_driver_m(VALUE obj, VALUE command)
     check_curses_error(error);
 
     return obj;
+}
+
+/*
+ * Document-method: Curses::Form#set_win
+ *
+ * call-seq:
+ *   set_win=(win)
+ *
+ * Set the window of the form.
+ */
+static VALUE
+form_set_win(VALUE obj, VALUE win)
+{
+    struct formdata *formp;
+    struct windata *winp;
+
+    GetFORM(obj, formp);
+    GetWINDOW(win, winp);
+    set_form_win(formp->form, winp->window);
+    return win;
+}
+
+/*
+ * Document-method: Curses::Form#set_sub
+ *
+ * call-seq:
+ *   set_sub=(win)
+ *
+ * Set the subwindow of the form.
+ */
+static VALUE
+form_set_sub(VALUE obj, VALUE win)
+{
+    struct formdata *formp;
+    struct windata *winp;
+
+    GetFORM(obj, formp);
+    GetWINDOW(win, winp);
+    set_form_sub(formp->form, winp->window);
+    return win;
+}
+
+/*
+ * Document-method: Curses::Form#scale
+ *
+ * call-seq:
+ *   scale
+ *
+ * Return the minimum rows and columns required for the subwindow of the form.
+ */
+static VALUE
+form_scale(VALUE obj)
+{
+    struct formdata *formp;
+    int error, rows, columns;
+
+    GetFORM(obj, formp);
+    error = scale_form(formp->form, &rows, &columns);
+    check_curses_error(error);
+    return rb_assoc_new(INT2NUM(rows), INT2NUM(columns));
 }
 
 #endif /* HAVE_FORM */
@@ -4575,6 +4695,9 @@ Init_curses(void)
     rb_define_method(cMenu, "items=", menu_set_items, 1);
     rb_define_method(cMenu, "current_item", menu_get_current_item, 0);
     rb_define_method(cMenu, "current_item=", menu_set_current_item, 1);
+    rb_define_method(cMenu, "set_win", menu_set_win, 1);
+    rb_define_method(cMenu, "set_sub", menu_set_sub, 1);
+    rb_define_method(cMenu, "scale", menu_scale, 0);
 #endif
 
 #ifdef HAVE_MENU
@@ -4610,6 +4733,9 @@ Init_curses(void)
     rb_define_method(cForm, "post", form_post, 0);
     rb_define_method(cForm, "unpost", form_unpost, 0);
     rb_define_method(cForm, "driver", form_driver_m, 1);
+    rb_define_method(cForm, "set_win", form_set_win, 1);
+    rb_define_method(cForm, "set_sub", form_set_sub, 1);
+    rb_define_method(cForm, "scale", form_scale, 0);
 #endif
 
 #define rb_curses_define_error(c) do { \
