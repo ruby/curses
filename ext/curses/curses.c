@@ -3875,6 +3875,86 @@ field_set_max(VALUE obj, VALUE max)
     return max;
 }
 
+#define TYPE_CODE_ALPHA 1
+#define TYPE_CODE_ALNUM 2
+#define TYPE_CODE_ENUM 3
+#define TYPE_CODE_INTEGER 4
+#define TYPE_CODE_NUMERIC 5
+#define TYPE_CODE_REGEXP 6
+
+static VALUE
+field_set_type(int argc, VALUE *argv, VALUE obj)
+{
+    struct fielddata *fieldp;
+    VALUE type;
+    int type_code;
+    int error;
+
+    if (argc < 1) {
+	rb_raise(rb_eArgError,
+                 "wrong number of arguments (given %d, expected 1)", argc);
+    }
+    type_code = NUM2INT(argv[0]);
+    GetFIELD(obj, fieldp);
+    switch (type_code) {
+    case TYPE_CODE_ALPHA:
+        {
+            VALUE width;
+	    rb_scan_args(argc, argv, "11", &type, &width);
+	    error = set_field_type(fieldp->field, TYPE_ALPHA,
+                                   NIL_P(width) ? 0 : NUM2INT(width));
+	}
+        break;
+    case TYPE_CODE_ALNUM:
+        {
+            VALUE width;
+	    rb_scan_args(argc, argv, "11", &type, &width);
+	    error = set_field_type(fieldp->field, TYPE_ALNUM,
+                                   NIL_P(width) ? 0 : NUM2INT(width));
+	}
+        break;
+#if 0
+    case TYPE_CODE_ENUM:
+        {
+            /* TODO: consider how valuelist should be allocated? */
+	}
+        break;
+#endif
+    case TYPE_CODE_INTEGER:
+        {
+            VALUE padding, vmin, vmax;
+	    rb_scan_args(argc, argv, "13", &type, &padding, &vmin, &vmax);
+	    error = set_field_type(fieldp->field, TYPE_INTEGER,
+                                   NIL_P(padding) ? 0 : NUM2INT(padding),
+                                   NIL_P(vmin) ? INT_MIN : NUM2INT(vmin),
+                                   NIL_P(vmax) ? INT_MAX : NUM2INT(vmax));
+	}
+        break;
+    case TYPE_CODE_NUMERIC:
+        {
+            VALUE padding, vmin, vmax;
+	    rb_scan_args(argc, argv, "13", &type, &padding, &vmin, &vmax);
+	    error = set_field_type(fieldp->field, TYPE_INTEGER,
+                                   NIL_P(padding) ? 0 : NUM2INT(padding),
+                                   NIL_P(vmin) ? INT_MIN : NUM2INT(vmin),
+                                   NIL_P(vmax) ? INT_MAX : NUM2INT(vmax));
+	}
+        break;
+#if 0
+    case TYPE_CODE_REGEXP:
+        {
+            /* TODO: consider how regexp should be allocated? */
+	}
+        break;
+#endif
+    default:
+	rb_raise(rb_eArgError, "unknwon type: %d", type_code);
+	break;
+    }
+    check_curses_error(error);
+    return obj;
+}
+
 struct formdata {
     FORM *form;
     VALUE fields;
@@ -4726,6 +4806,7 @@ Init_curses(void)
     rb_define_method(cField, "max", field_max, 0);
     rb_define_method(cField, "set_max", field_set_max, 1);
     rb_define_method(cField, "max=", field_set_max, 1);
+    rb_define_method(cField, "set_type", field_set_type, -1);
 
     cForm = rb_define_class_under(mCurses, "Form", rb_cData);
     rb_define_alloc_func(cForm, form_s_allocate);
@@ -6262,6 +6343,13 @@ Init_curses(void)
 #ifdef O_NO_LEFT_STRIP
     rb_curses_define_const(O_NO_LEFT_STRIP);
 #endif
+
+    rb_define_const(mCurses, "TYPE_ALPHA", INT2NUM(TYPE_CODE_ALPHA));
+    rb_define_const(mCurses, "TYPE_ALNUM", INT2NUM(TYPE_CODE_ALNUM));
+    rb_define_const(mCurses, "TYPE_ENUM", INT2NUM(TYPE_CODE_ENUM));
+    rb_define_const(mCurses, "TYPE_INTEGER", INT2NUM(TYPE_CODE_INTEGER));
+    rb_define_const(mCurses, "TYPE_NUMERIC", INT2NUM(TYPE_CODE_NUMERIC));
+    rb_define_const(mCurses, "TYPE_REGEXP", INT2NUM(TYPE_CODE_REGEXP));
 
     rb_curses_define_const(REQ_NEXT_PAGE);
     rb_curses_define_const(REQ_PREV_PAGE);
