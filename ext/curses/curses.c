@@ -3695,6 +3695,126 @@ field_opts_m(VALUE obj)
     return INT2NUM(field_opts(fieldp->field));
 }
 
+static VALUE
+field_height(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = field_info(fieldp->field, &val, NULL, NULL, NULL, NULL, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_width(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = field_info(fieldp->field, NULL, &val, NULL, NULL, NULL, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_toprow(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = field_info(fieldp->field, NULL, NULL, &val, NULL, NULL, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_leftcol(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = field_info(fieldp->field, NULL, NULL, NULL, &val, NULL, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_offscreen(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = field_info(fieldp->field, NULL, NULL, NULL, NULL, &val, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_nbuffers(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = field_info(fieldp->field, NULL, NULL, NULL, NULL, NULL, &val);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_dynamic_height(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = dynamic_field_info(fieldp->field, &val, NULL, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_dynamic_width(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = dynamic_field_info(fieldp->field, NULL, &val, NULL);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_max(VALUE obj)
+{
+    struct fielddata *fieldp;
+    int error, val;
+
+    GetFIELD(obj, fieldp);
+    error = dynamic_field_info(fieldp->field, NULL, NULL, &val);
+    check_curses_error(error);
+    return INT2NUM(val);
+}
+
+static VALUE
+field_set_max(VALUE obj, VALUE max)
+{
+    struct fielddata *fieldp;
+    int error;
+
+    GetFIELD(obj, fieldp);
+    error = set_max_field(fieldp->field, NUM2INT(max));
+    check_curses_error(error);
+    return max;
+}
+
 struct formdata {
     FORM *form;
     VALUE fields;
@@ -4472,6 +4592,17 @@ Init_curses(void)
     rb_define_method(cField, "opts_on", field_opts_on_m, 1);
     rb_define_method(cField, "opts_off", field_opts_off_m, 1);
     rb_define_method(cField, "opts", field_opts_m, 0);
+    rb_define_method(cField, "height", field_height, 0);
+    rb_define_method(cField, "width", field_width, 0);
+    rb_define_method(cField, "toprow", field_toprow, 0);
+    rb_define_method(cField, "leftcol", field_leftcol, 0);
+    rb_define_method(cField, "offscreen", field_offscreen, 0);
+    rb_define_method(cField, "nbuffers", field_nbuffers, 0);
+    rb_define_method(cField, "dynamic_height", field_dynamic_height, 0);
+    rb_define_method(cField, "dynamic_width", field_dynamic_width, 0);
+    rb_define_method(cField, "max", field_max, 0);
+    rb_define_method(cField, "set_max", field_set_max, 1);
+    rb_define_method(cField, "max=", field_set_max, 1);
 
     cForm = rb_define_class_under(mCurses, "Form", rb_cData);
     rb_define_alloc_func(cForm, form_s_allocate);
