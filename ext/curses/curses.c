@@ -3584,7 +3584,7 @@ field_set_fore(VALUE obj, VALUE attr)
     GetFIELD(obj, fieldp);
     set_field_fore(fieldp->field, NUM2CHTYPE(attr));
 
-    return obj;
+    return attr;
 }
 
 /*
@@ -3620,7 +3620,7 @@ field_set_back(VALUE obj, VALUE attr)
     GetFIELD(obj, fieldp);
     set_field_back(fieldp->field, NUM2CHTYPE(attr));
 
-    return obj;
+    return attr;
 }
 
 /*
@@ -3638,6 +3638,61 @@ field_get_back(VALUE obj)
 
     GetFIELD(obj, fieldp);
     return CHTYPE2NUM(field_back(fieldp->field));
+}
+
+/*
+ * Document-method: Curses::Field#opts_on
+ *
+ * call-seq:
+ *   opts_on(opts)
+ *
+ * Turn on the given option bits.
+ */
+static VALUE
+field_opts_on_m(VALUE obj, VALUE opts)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    field_opts_on(fieldp->field, NUM2INT(opts));
+
+    return opts;
+}
+
+/*
+ * Document-method: Curses::Field#opts_off
+ *
+ * call-seq:
+ *   opts_off(opts)
+ *
+ * Turn off the given option bits.
+ */
+static VALUE
+field_opts_off_m(VALUE obj, VALUE opts)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    field_opts_off(fieldp->field, NUM2INT(opts));
+
+    return opts;
+}
+
+/*
+ * Document-method: Curses::Field#opts
+ *
+ * call-seq:
+ *   opts
+ *
+ * Get the current option bits.
+ */
+static VALUE
+field_opts_m(VALUE obj)
+{
+    struct fielddata *fieldp;
+
+    GetFIELD(obj, fieldp);
+    return INT2NUM(field_opts(fieldp->field));
 }
 
 struct formdata {
@@ -4414,6 +4469,9 @@ Init_curses(void)
     rb_define_method(cField, "set_back", field_set_back, 1);
     rb_define_method(cField, "back=", field_set_back, 1);
     rb_define_method(cField, "back", field_get_back, 0);
+    rb_define_method(cField, "opts_on", field_opts_on_m, 1);
+    rb_define_method(cField, "opts_off", field_opts_off_m, 1);
+    rb_define_method(cField, "opts", field_opts_m, 0);
 
     cForm = rb_define_class_under(mCurses, "Form", rb_cData);
     rb_define_alloc_func(cForm, form_s_allocate);
@@ -5930,7 +5988,24 @@ Init_curses(void)
     rb_curses_define_const(REQ_PREV_MATCH);
 #endif
 
-#ifdef HAVE_MENU
+#ifdef HAVE_FORM
+    rb_curses_define_const(O_VISIBLE);
+    rb_curses_define_const(O_ACTIVE);
+    rb_curses_define_const(O_PUBLIC);
+    rb_curses_define_const(O_EDIT);
+    rb_curses_define_const(O_WRAP);
+    rb_curses_define_const(O_BLANK);
+    rb_curses_define_const(O_AUTOSKIP);
+    rb_curses_define_const(O_NULLOK);
+    rb_curses_define_const(O_PASSOK);
+    rb_curses_define_const(O_STATIC);
+#ifdef O_DYNAMIC_JUSTIFY
+    rb_curses_define_const(O_DYNAMIC_JUSTIFY);
+#endif
+#ifdef O_NO_LEFT_STRIP
+    rb_curses_define_const(O_NO_LEFT_STRIP);
+#endif
+
     rb_curses_define_const(REQ_NEXT_PAGE);
     rb_curses_define_const(REQ_PREV_PAGE);
     rb_curses_define_const(REQ_FIRST_PAGE);

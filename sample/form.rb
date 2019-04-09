@@ -14,6 +14,7 @@ fields = [
 ]
 fields.each do |field|
   field.set_back(Curses::A_UNDERLINE)
+  field.opts_off(Curses::O_AUTOSKIP)
 end
 
 form = Curses::Form.new(fields)
