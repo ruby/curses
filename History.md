@@ -1,3 +1,17 @@
+### 1.3.0 / 2019-04-16
+
+New features:
+
+* Add Curses::Form and Curses::Field.
+
+Bug fixes:
+
+* Fix TravisCI issues by amatsuda and znz.
+* Fix typo in sample/menu.rb by binford2k.
+* Ctrl-/ should return ^_ on Windows.
+* Workaround for new Windows console.
+  https://github.com/Bill-Gray/PDCurses/pull/108
+
 ### 1.2.7 / 2019-01-10
 
 Bug fixes:
