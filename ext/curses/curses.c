@@ -213,6 +213,7 @@ static VALUE window_attroff(VALUE obj, VALUE attrs);
 static VALUE window_attron(VALUE obj, VALUE attrs);
 static VALUE window_attrset(VALUE obj, VALUE attrs);
 
+NORETURN(static void no_window(void));
 static void
 no_window(void)
 {
@@ -1439,6 +1440,7 @@ struct mousedata {
     MEVENT *mevent;
 };
 
+NORETURN(static void no_mevent(void));
 static void
 no_mevent(void)
 {
@@ -3706,6 +3708,7 @@ struct fielddata {
     FIELD *field;
 };
 
+NORETURN(static void no_field(void));
 static void
 no_field(void)
 {
@@ -4152,6 +4155,7 @@ struct formdata {
     VALUE fields;
 };
 
+NORETURN(static void no_form(void));
 static void
 no_form(void)
 {
