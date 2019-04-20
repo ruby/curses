@@ -241,7 +241,7 @@ window_memsize(const void *p)
     const struct windata *winp = p;
     size_t size = sizeof(*winp);
     if (!winp) return 0;
-    if (winp->window && winp->window != stdscr) size += sizeof(*winp->window);
+    if (winp->window && winp->window != stdscr) size += CURSES_SIZEOF_WINDOW;
     return size;
 }
 
@@ -1466,7 +1466,7 @@ curses_mousedata_memsize(const void *p)
     const struct mousedata *mdata = p;
     size_t size = sizeof(*mdata);
     if (!mdata) return 0;
-    if (mdata->mevent) size += sizeof(*mdata->mevent);
+    if (mdata->mevent) size += CURSES_SIZEOF_MEVENT;
     return size;
 }
 
@@ -3063,7 +3063,7 @@ item_memsize(const void *p)
     const struct itemdata *itemp = p;
     size_t size = sizeof(*itemp);
     if (!itemp) return 0;
-    if (itemp->item) size += sizeof(*itemp->item);
+    if (itemp->item) size += CURSES_SIZEOF_ITEM;
     return size;
 }
 
@@ -3274,7 +3274,7 @@ menu_memsize(const void *p)
     const struct menudata *menup = p;
     size_t size = sizeof(*menup);
     if (!menup) return 0;
-    if (menup->menu) size += sizeof(*menup->menu);
+    if (menup->menu) size += CURSES_SIZEOF_MENU;
     return size;
 }
 
@@ -3734,7 +3734,7 @@ field_memsize(const void *p)
     const struct fielddata *fieldp = p;
     size_t size = sizeof(*fieldp);
     if (!fieldp) return 0;
-    if (fieldp->field) size += sizeof(*fieldp->field);
+    if (fieldp->field) size += CURSES_SIZEOF_FIELD;
     return size;
 }
 
@@ -4191,7 +4191,7 @@ form_memsize(const void *p)
     const struct formdata *formp = p;
     size_t size = sizeof(*formp);
     if (!formp) return 0;
-    if (formp->form) size += sizeof(*formp->form);
+    if (formp->form) size += CURSES_SIZEOF_FORM;
     return size;
 }
 

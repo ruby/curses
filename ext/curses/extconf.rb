@@ -1,4 +1,5 @@
 require 'mkmf'
+require 'shellwords'
 
 def have_all(*args)
   old_libs = $libs.dup
@@ -158,6 +159,57 @@ if header_library
        have_library("form", "new_form"))
     $defs << '-DHAVE_FORM'
     have_func("form_driver_w")
+  end
+
+  ["WINDOW", "MEVENT", "ITEM", "MENU", "FIELD", "FORM"].each do |type|
+    checking_for("sizeof(#{type}) is available") {
+      if try_compile(<<EOF, Shellwords.join($defs))
+#if defined(HAVE_NCURSESW_CURSES_H)
+# include <ncursesw/curses.h>
+#elif defined(HAVE_NCURSES_CURSES_H)
+# include <ncurses/curses.h>
+#elif defined(HAVE_NCURSES_H)
+# include <ncurses.h>
+#elif defined(HAVE_CURSES_COLR_CURSES_H)
+# ifdef HAVE_STDARG_PROTOTYPES
+#  include <stdarg.h>
+# else
+#  include <varargs.h>
+# endif
+# include <curses_colr/curses.h>
+#else
+# include <curses.h>
+#endif
+
+#if defined(HAVE_NCURSESW_MENU_H)
+# include <ncursesw/menu.h>
+#elif defined(HAVE_NCURSES_MENU_H)
+# include <ncurses/menu.h>
+#elif defined(HAVE_CURSES_MENU_H)
+# include <curses/menu.h>
+#elif defined(HAVE_MENU_H)
+# include <menu.h>
+#endif
+
+#if defined(HAVE_NCURSESW_FORM_H)
+# include <ncursesw/form.h>
+#elif defined(HAVE_NCURSES_FORM_H)
+# include <ncurses/form.h>
+#elif defined(HAVE_CURSES_FORM_H)
+# include <curses/form.h>
+#elif defined(HAVE_FORM_H)
+# include <form.h>
+#endif
+
+const int sizeof_#{type} = (int) sizeof(#{type});
+EOF
+        $defs << "-DCURSES_SIZEOF_#{type}=sizeof(#{type})"
+        true
+      else
+        $defs << "-DCURSES_SIZEOF_#{type}=0"
+        false
+      end
+    }
   end
 
   if RUBY_VERSION >= '2.1'
