@@ -1,3 +1,10 @@
+### 1.3.1 / 2019-04-21
+
+Bug fixes:
+
+* Check whether sizeof(WINDOW) is available to avoid build failures on macOS.
+  Issue #48 reported by chdiza.
+
 ### 1.3.0 / 2019-04-16
 
 New features:
