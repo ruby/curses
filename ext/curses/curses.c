@@ -858,7 +858,7 @@ getstr_func(void *arg)
 /*
  * Document-method: Curses.getstr
  *
- * This is equivalent to a series f Curses::Window.getch calls
+ * This is equivalent to a series of Curses::Window.getch calls
  *
  */
 static VALUE
@@ -2416,7 +2416,7 @@ wgetstr_func(void *_arg)
 /*
  * Document-method: Curses::Window.getstr
  *
- * This is equivalent to a series f Curses::Window.getch calls
+ * This is equivalent to a series of Curses::Window.getch calls
  *
  */
 static VALUE
