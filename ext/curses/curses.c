@@ -221,8 +221,6 @@ no_window(void)
 }
 
 #define GetWINDOW(obj, winp) do {\
-    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
-	rb_raise(rb_eSecurityError, "Insecure: operation on untainted window");\
     TypedData_Get_Struct((obj), struct windata, &windata_type, (winp));\
     if ((winp)->window == 0) no_window();\
 } while (0)
@@ -1448,8 +1446,6 @@ no_mevent(void)
 }
 
 #define GetMOUSE(obj, data) do {\
-    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
-	rb_raise(rb_eSecurityError, "Insecure: operation on untainted mouse");\
     TypedData_Get_Struct((obj), struct mousedata, &mousedata_type, (data));\
     if ((data)->mevent == 0) no_mevent();\
 } while (0)
@@ -3044,8 +3040,6 @@ no_item(void)
 }
 
 #define GetITEM(obj, itemp) do {\
-    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
-	rb_raise(rb_eSecurityError, "Insecure: operation on untainted item");\
     TypedData_Get_Struct((obj), struct itemdata, &itemdata_type, (itemp));\
     if ((itemp)->item == 0) no_item();\
 } while (0)
@@ -3244,8 +3238,6 @@ no_menu(void)
 }
 
 #define GetMENU(obj, menup) do {\
-    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
-	rb_raise(rb_eSecurityError, "Insecure: operation on untainted menu");\
     TypedData_Get_Struct((obj), struct menudata, &menudata_type, (menup));\
     if ((menup)->menu == 0) no_menu();\
 } while (0)
@@ -3716,8 +3708,6 @@ no_field(void)
 }
 
 #define GetFIELD(obj, fieldp) do {\
-    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
-	rb_raise(rb_eSecurityError, "Insecure: operation on untainted field");\
     TypedData_Get_Struct((obj), struct fielddata, &fielddata_type, (fieldp));\
     if ((fieldp)->field == 0) no_field();\
 } while (0)
@@ -4163,8 +4153,6 @@ no_form(void)
 }
 
 #define GetFORM(obj, formp) do {\
-    if (!OBJ_TAINTED(obj) && rb_safe_level() >= 4)\
-	rb_raise(rb_eSecurityError, "Insecure: operation on untainted form");\
     TypedData_Get_Struct((obj), struct formdata, &formdata_type, (formp));\
     if ((formp)->form == 0) no_form();\
 } while (0)
