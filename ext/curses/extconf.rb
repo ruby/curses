@@ -27,7 +27,9 @@ dir_config('ncurses')
 dir_config('termcap')
 
 have_library("mytinfo", "tgetent") if /bow/ =~ RUBY_PLATFORM
-have_library("tinfo", "tgetent") or have_library("termcap", "tgetent")
+have_library("tinfow", "tgetent") ||
+  have_library("tinfo", "tgetent") ||
+  have_library("termcap", "tgetent")
 
 header_library = nil
 [
