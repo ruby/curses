@@ -1,3 +1,10 @@
+### 1.3.2 / 2019-12-20
+
+Bug fixes:
+
+* Drop rb_safe_level check for Ruby 2.7 by Eric Wong.
+* Try libtinfow first.  Issue #52 by Marco Sirabella. 
+
 ### 1.3.1 / 2019-04-21
 
 Bug fixes:
