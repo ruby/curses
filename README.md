@@ -18,7 +18,7 @@ with the release of Ruby 2.1.0. (see [ruby/ruby@9c5b2fd][2])
 ## Install
 
     $ gem install curses
-        
+
 Requires ncurses or ncursesw (with wide character support).
 On Debian based distributions, you can install it with apt:
 
@@ -27,6 +27,9 @@ On Debian based distributions, you can install it with apt:
 Or
 
     $ apt install libncursesw5-dev
+
+On mingw, `gem install curses` will install pre-built PDCurses, so you
+don't need to install extra libraries.
 
 ## Documentation
 
