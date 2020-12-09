@@ -1,5 +1,6 @@
 require 'mkmf'
 require 'shellwords'
+require 'fileutils'
 
 def have_all(*args)
   old_libs = $libs.dup
@@ -22,7 +23,53 @@ def have_all(*args)
   end
 end
 
-dir_config('curses')
+def exec_command(cmd)
+  puts "> #{cmd}"
+  if !system(cmd)
+    STDERR.puts("External command failed")
+    exit 1
+  end
+end
+
+$mingw = /mingw/ =~ RUBY_PLATFORM
+$mswin = /mswin/ =~ RUBY_PLATFORM
+$windows = $mingw || $mswin
+$x64 = /x64/ =~ RUBY_PLATFORM
+$use_system_libs = arg_config('--use-system-libraries',
+                              ENV.key?("CURSES_USE_SYSTEM_LIBRARIES"))
+$idefault = nil
+$ldefault = nil
+$pdcurses_wide_default = nil
+$pdcurses_dll_default = nil
+$curses_version_default = nil
+if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
+  $pdcurses_wide_default = true
+  $curses_version_default = "function"
+  pdcurses_dir = File.expand_path("../../vendor/PDCurses", __dir__)
+  $idefault = $ldefault = pdcurses_dir
+  wincon_dir = File.expand_path("wincon", pdcurses_dir)
+  old_dir == Dir.pwd
+  Dir.chdir(wincon_dir)
+  begin
+    if $mswin
+      exec_command "nmake -f Makefile.vc clean all WIDE=Y DLL=Y"
+      FileUtils.cp("pdcurses.dll", pdcurses_dir)
+      FileUtils.cp("pdcurses.lib", pdcurses_dir)
+      $pdcurses_dll_default = true
+    else
+      if $x64
+        exec_command "make -f Makefile.mng clean all _w64=1 WIDE=Y DLL=N"
+      else
+        exec_command "make -f Makefile.mng clean all WIDE=Y DLL=N"
+      end
+      FileUtils.cp("pdcurses.a", pdcurses_dir)
+    end
+  ensure
+    Dir.chdir(old_dir)
+  end
+end
+
+dir_config('curses', $idefault, $ldefault)
 dir_config('ncurses')
 dir_config('termcap')
 
@@ -89,8 +136,8 @@ if header_library
   #   --with-curses-version=function    for SVR4
   #   --with-curses-version=variable    for ncurses and PDcurses
   #   (not given)                       automatically determined
-
-  case with_curses_version = with_config("curses-version")
+  with_curses_version = with_config("curses-version", $curses_version_default)
+  case with_curses_version
   when "function"
     $defs << '-DHAVE_FUNC_CURSES_VERSION'
   when "variable"
@@ -136,11 +183,11 @@ if header_library
     warn "unexpected value for --with-curses-version: #{with_curses_version}"
   end
 
-  if enable_config("pdcurses-wide")
+  if enable_config("pdcurses-wide", $pdcurses_wide_default)
     $defs << '-DPDC_WIDE'
   end
 
-  if enable_config("pdcurses-dll")
+  if enable_config("pdcurses-dll", $pdcurses_dll_default)
     $defs << '-DPDC_DLL_BUILD'
   end
 
