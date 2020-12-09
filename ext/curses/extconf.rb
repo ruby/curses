@@ -44,6 +44,7 @@ $pdcurses_dll_default = nil
 $curses_version_default = nil
 if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
   $pdcurses_wide_default = true
+  $pdcurses_dll_default = true
   $curses_version_default = "function"
   pdcurses_dir = File.expand_path("../../vendor/PDCurses", __dir__)
   $idefault = $ldefault = pdcurses_dir
@@ -55,13 +56,13 @@ if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
       exec_command "nmake -f Makefile.vc clean all WIDE=Y DLL=Y"
       FileUtils.cp("pdcurses.dll", pdcurses_dir)
       FileUtils.cp("pdcurses.lib", pdcurses_dir)
-      $pdcurses_dll_default = true
     else
       if $x64
-        exec_command "make -f Makefile.mng clean all _w64=1 WIDE=Y DLL=N"
+        exec_command "make -f Makefile.mng clean all _w64=1 WIDE=Y DLL=Y"
       else
-        exec_command "make -f Makefile.mng clean all WIDE=Y DLL=N"
+        exec_command "make -f Makefile.mng clean all WIDE=Y DLL=Y"
       end
+      FileUtils.cp("pdcurses.dll", pdcurses_dir)
       FileUtils.cp("pdcurses.a", pdcurses_dir)
     end
   ensure
