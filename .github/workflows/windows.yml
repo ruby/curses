@@ -1,0 +1,24 @@
+name: windows
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        ruby: [ '2.7.x', '2.6.x', '2.5.x' ]
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install dependencies
+      run: |
+        gem install bundler --no-document
+        bundle install
+    - name: Builde package
+      run: bundle exec rake build
+    - name: Install package
+      run: gem install pkg/curses-*.gem
