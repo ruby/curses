@@ -48,7 +48,7 @@ if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
   pdcurses_dir = File.expand_path("../../vendor/PDCurses", __dir__)
   $idefault = $ldefault = pdcurses_dir
   wincon_dir = File.expand_path("wincon", pdcurses_dir)
-  old_dir == Dir.pwd
+  old_dir = Dir.pwd
   Dir.chdir(wincon_dir)
   begin
     if $mswin
