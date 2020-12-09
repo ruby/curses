@@ -21,4 +21,6 @@ jobs:
     - name: Builde package
       run: bundle exec rake build
     - name: Install package
-      run: gem install pkg/curses-*.gem
+      run: |
+        gem install pkg/curses-*.gem
+        ruby -r curses -e 'puts Curses::VERSION'
