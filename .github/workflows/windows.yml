@@ -20,8 +20,13 @@ jobs:
       run: |
         gem install bundler --no-document
         bundle install
-    - name: Builde package
+    - name: Build package
       run: bundle exec rake build
+    - name: Build extension library
+      run: |
+        cd ext/curses
+        ruby extconf.rb
+        make
     - name: Install package
       run: |
         gem install pkg/curses-*.gem

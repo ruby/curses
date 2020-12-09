@@ -11,7 +11,7 @@ jobs:
       run: |
         gem install bundler --no-document
         bundle install
-    - name: Builde package
+    - name: Build package
       run: bundle exec rake build
     - name: Install package
       run: |
