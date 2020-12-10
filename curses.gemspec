@@ -13,5 +13,4 @@ Gem::Specification.new { |s|
   s.licenses = ['Ruby', 'BSD-2-Clause']
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'rake-compiler'
 }
