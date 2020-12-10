@@ -62,7 +62,7 @@ if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
       else
         exec_command "make -f Makefile.mng clean all WIDE=Y DLL=N"
       end
-      FileUtils.cp("pdcurses.a", pdcurses_dir)
+      FileUtils.cp("pdcurses.a", File.expand_path("libpdcurses.a", pdcurses_dir))
     end
   ensure
     Dir.chdir(old_dir)
