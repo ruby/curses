@@ -7,7 +7,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        ruby: [ 'mingw', 'mswin', '2.7.x', '2.6.x', '2.5.x' ]
+        ruby: [ 'mingw', 'mswin', '2.7', '2.6', '2.5' ]
     steps:
     - uses: actions/checkout@v2
       with:
