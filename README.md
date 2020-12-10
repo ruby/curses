@@ -29,8 +29,13 @@ Or
 
     $ apt install libncursesw5-dev
 
-On mingw, `gem install curses` will install pre-built PDCurses, so you
+On Windows, `gem install curses` will install pre-built PDCurses, so you
 don't need to install extra libraries.
+However, if you prefer ncurses to PDCurses, specify the following option:
+
+    > gem install curses -- --use-system-libraries
+
+On mingw, you need DevKit to compile the extension library.
 
 ## Documentation
 
@@ -43,57 +48,16 @@ After checking out the repo, run `bundle install` to install dependencies.
 To compile the extension library, run `bundle exec rake compile`.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `curses.gemspec`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-### Cross compilation for Windows on Debian GNU/Linux based platforms
-
-1. Install development environment fo 32- and 64-bit Windows.
-
-   ```
-   $ sudo apt-get install mingw-w64
-   ```
-
-2. Install rake-compiler.
-
-   ```
-   $ gem install rake-compiler
-   ```
-
-3. Compile multiple versions of Ruby.
-
-   ```
-   $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.2.6
-   $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.3.3
-   $ rake-compiler cross-ruby HOST=i686-w64-mingw32 VERSION=2.4.0
-   $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.2.6
-   $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.3.3
-   $ rake-compiler cross-ruby HOST=x86_64-w64-mingw32 VERSION=2.4.0
-   ```
-
-3. Compile PDCurses.
-
-   ```
-   $ rake build:pdcurses
-   ```
-
-5. Compile curses.gem.
-
-   ```
-   $ rake RUBY_CC_VERSION=2.3.3:2.4.0 cross clean compile native gem
-   ```
-
-Binary gems are generated in pkg/.
-
 ## License
 
 curses is released under the Ruby and 2-clause BSD licenses.  See COPYING for
 details.
 
-Binary gems for mingw32 include a forked version of PDCurses, which is in
-the public domain:
+It includes a forked version of PDCurses, which is in the public domain:
 
   https://github.com/Bill-Gray/PDCurses
 
-The version for Win32 console mode in the win32 subdirectory is used.
+The version for Win32 console mode in the wincon subdirectory is used.
 
 [1]: https://bugs.ruby-lang.org/issues/8584
 [2]: https://github.com/ruby/ruby/commit/9c5b2fd8aa0fd343ad094d47a638cfd3f6ae0a81
