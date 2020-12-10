@@ -1,3 +1,9 @@
+### 1.4.0 / 2020-12-10
+
+New features:
+
+* Remove fat binary support for newer versions of Ruby
+
 ### 1.3.2 / 2019-12-20
 
 Bug fixes:
