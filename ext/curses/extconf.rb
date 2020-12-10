@@ -31,6 +31,15 @@ def exec_command(cmd)
   end
 end
 
+$library_candidates = [
+  ["ncursesw/curses.h", ["ncursesw"]],
+  ["ncurses.h", ["ncursesw", "ncurses"]],
+  ["ncurses/curses.h", ["ncurses"]],
+  ["curses_colr/curses.h", ["cur_colr"]],
+  ["curses.h", ["curses", "pdcurses"]],
+  # ["xcurses.h", ["XCurses"]], # XCurses (PDCurses for X11)
+]
+
 $mingw = /mingw/ =~ RUBY_PLATFORM
 $mswin = /mswin/ =~ RUBY_PLATFORM
 $windows = $mingw || $mswin
@@ -67,6 +76,10 @@ if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
   ensure
     Dir.chdir(old_dir)
   end
+  $library_candidates = [
+    ["curses.h", ["pdcurses"]]
+  ]
+]
 end
 
 dir_config('curses', $idefault, $ldefault)
@@ -79,14 +92,7 @@ have_library("tinfow", "tgetent") ||
   have_library("termcap", "tgetent")
 
 header_library = nil
-[
-  ["ncursesw/curses.h", ["ncursesw"]],
-  ["ncurses.h", ["ncursesw", "ncurses"]],
-  ["ncurses/curses.h", ["ncurses"]],
-  ["curses_colr/curses.h", ["cur_colr"]],
-  ["curses.h", ["curses", "pdcurses"]],
-  # ["xcurses.h", ["XCurses"]], # XCurses (PDCurses for X11)
-].each {|hdr, libs|
+$library_candidates.each {|hdr, libs|
   header_library = have_all(
     lambda { have_header(hdr) && hdr },
     lambda {|h| libs.find {|lib| have_library(lib, "initscr", h) } })
