@@ -79,7 +79,6 @@ if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
   $library_candidates = [
     ["curses.h", ["pdcurses"]]
   ]
-]
 end
 
 dir_config('curses', $idefault, $ldefault)
