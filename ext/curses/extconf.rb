@@ -76,8 +76,10 @@ if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
   ensure
     Dir.chdir(old_dir)
   end
+  FileUtils.cp(File.expand_path("curses.h", pdcurses_dir),
+               File.expand_path("pdcurses.h", pdcurses_dir))
   $library_candidates = [
-    ["curses.h", ["pdcurses"]]
+    ["pdcurses.h", ["pdcurses"]]
   ]
 end
 
