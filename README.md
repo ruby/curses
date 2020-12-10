@@ -29,7 +29,7 @@ Or
 
     $ apt install libncursesw5-dev
 
-On Windows, `gem install curses` will install pre-built PDCurses, so you
+On Windows, `gem install curses` will build bundled PDCurses, so you
 don't need to install extra libraries.
 However, if you prefer ncurses to PDCurses, specify the following option:
 
