@@ -22,7 +22,7 @@
 
 #if defined(HAVE_PDCURSES_H)
 # include <pdcurses.h>
-#if defined(HAVE_NCURSESW_CURSES_H)
+#elif defined(HAVE_NCURSESW_CURSES_H)
 # include <ncursesw/curses.h>
 #elif defined(HAVE_NCURSES_CURSES_H)
 # include <ncurses/curses.h>

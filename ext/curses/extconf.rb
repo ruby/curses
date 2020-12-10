@@ -51,7 +51,8 @@ $ldefault = nil
 $pdcurses_wide_default = nil
 $pdcurses_dll_default = nil
 $curses_version_default = nil
-if !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
+$use_bundled_pdcurses = !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
+if $use_bundled_pdcurses
   $pdcurses_wide_default = true
   $curses_version_default = "function"
   pdcurses_dir = File.expand_path("../../vendor/PDCurses", __dir__)
@@ -198,19 +199,21 @@ if header_library
     $defs << '-DPDC_DLL_BUILD'
   end
 
-  if (have_header("ncursesw/menu.h") ||
-      have_header("ncurses/menu.h") ||
-      have_header("curses/menu.h") ||
-      have_header("menu.h")) &&
+  if !$use_bundled_pdcurses &&
+      (have_header("ncursesw/menu.h") ||
+       have_header("ncurses/menu.h") ||
+       have_header("curses/menu.h") ||
+       have_header("menu.h")) &&
       (have_library("menuw", "new_menu") ||
        have_library("menu", "new_menu"))
     $defs << '-DHAVE_MENU'
   end
 
-  if (have_header("ncursesw/form.h") ||
-      have_header("ncurses/form.h") ||
-      have_header("curses/form.h") ||
-      have_header("form.h")) &&
+  if !$use_bundled_pdcurses &&
+      (have_header("ncursesw/form.h") ||
+       have_header("ncurses/form.h") ||
+       have_header("curses/form.h") ||
+       have_header("form.h")) &&
       (have_library("formw", "new_form") ||
        have_library("form", "new_form"))
     $defs << '-DHAVE_FORM'
@@ -220,7 +223,9 @@ if header_library
   ["WINDOW", "MEVENT", "ITEM", "MENU", "FIELD", "FORM"].each do |type|
     checking_for("sizeof(#{type}) is available") {
       if try_compile(<<EOF, Shellwords.join($defs))
-#if defined(HAVE_NCURSESW_CURSES_H)
+#if defined(HAVE_PDCURSES_H)
+# include <pdcurses.h>
+#elif defined(HAVE_NCURSESW_CURSES_H)
 # include <ncursesw/curses.h>
 #elif defined(HAVE_NCURSES_CURSES_H)
 # include <ncurses/curses.h>
