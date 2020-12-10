@@ -7,19 +7,16 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        ruby: [ '2.7.x', '2.6.x', '2.5.x' ]
+        ruby: [ 'mingw', 'mswin', '2.7.x', '2.6.x', '2.5.x' ]
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
     - name: Set up Ruby
-      uses: actions/setup-ruby@v1
+      uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Install dependencies
-      run: |
-        gem install bundler --no-document
-        bundle install
+        bundler-cache: true
     - name: Build package
       run: bundle exec rake build
     - name: Install package
