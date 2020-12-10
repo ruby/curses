@@ -1,8 +1,9 @@
 # curses
 
 [![Gem Version](https://badge.fury.io/rb/curses.svg)](https://badge.fury.io/rb/curses)
-[![Build Status](https://travis-ci.org/ruby/curses.svg?branch=master)](https://travis-ci.org/ruby/curses)
-[![Build status](https://ci.appveyor.com/api/projects/status/kdvksgjo4fyd3c4m/branch/master?svg=true)](https://ci.appveyor.com/project/ruby/curses/branch/master)
+[![ubuntu](https://github.com/ruby/curses/workflows/ubuntu/badge.svg)](https://github.com/ruby/curses/actions?query=workflow%3Aubuntu)
+[![windows](https://github.com/ruby/curses/workflows/windows/badge.svg)](https://github.com/ruby/curses/actions?query=workflow%3Awindows)
+[![macos](https://github.com/ruby/curses/workflows/macos/badge.svg)](https://github.com/ruby/curses/actions?query=workflow%3Amacos)
 
 * https://github.com/ruby/curses
 * https://github.com/ruby/curses/issues
