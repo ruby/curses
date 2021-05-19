@@ -85,6 +85,17 @@
 #define NUM2CH NUM2CHR
 #define CH2FIX CHR2FIX
 
+#define OBJ2CHTYPE rb_obj2chtype_inline
+
+static inline chtype
+rb_obj2chtype_inline(VALUE x)
+{
+    if (RB_TYPE_P(x, RUBY_T_STRING) && (RSTRING_LEN(x)>=1))
+        return RSTRING_PTR(x)[0];
+    else
+        return NUM2CHTYPE(x);
+}
+
 static VALUE mCurses;
 static VALUE mKey;
 static VALUE cWindow;
@@ -762,7 +773,7 @@ static VALUE
 curses_addch(VALUE obj, VALUE ch)
 {
     curses_stdscr();
-    addch(NUM2CH(ch));
+    addch(OBJ2CHTYPE(ch));
     return Qnil;
 }
 
@@ -777,7 +788,7 @@ static VALUE
 curses_insch(VALUE obj, VALUE ch)
 {
     curses_stdscr();
-    insch(NUM2CH(ch));
+    insch(OBJ2CHTYPE(ch));
     return Qnil;
 }
 
@@ -2286,7 +2297,7 @@ window_addch(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj, winp);
-    waddch(winp->window, NUM2CH(ch));
+    waddch(winp->window, NUM2CHTYPE(ch));
 
     return Qnil;
 }
