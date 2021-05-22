@@ -302,7 +302,7 @@ static void curses_finalize(VALUE);
  * see also Curses.stdscr
  */
 static VALUE
-curses_init_screen(void)
+curses_init_screen(VALUE self)
 {
     if (rb_stdscr) return rb_stdscr;
     initscr();
@@ -325,7 +325,7 @@ curses_init_screen(void)
  *
  * Many curses functions use this window.
  */
-#define curses_stdscr curses_init_screen
+#define curses_stdscr() curses_init_screen(Qnil)
 
 /*
  * Document-method: Curses.close_screen
@@ -341,7 +341,7 @@ curses_init_screen(void)
  *
  */
 static VALUE
-curses_close_screen(void)
+curses_close_screen(VALUE self)
 {
     curses_stdscr();
 #ifdef HAVE_ISENDWIN
@@ -381,7 +381,7 @@ curses_finalize(VALUE dummy)
  * returns +false+ otherwise.
  */
 static VALUE
-curses_closed(void)
+curses_closed(VALUE self)
 {
     curses_stdscr();
     if (isendwin()) {
@@ -431,7 +431,7 @@ curses_erase(VALUE obj)
  * Clears to the end of line, that the cursor is currently on.
  */
 static VALUE
-curses_clrtoeol(void)
+curses_clrtoeol(VALUE self)
 {
     curses_stdscr();
     clrtoeol();
@@ -960,7 +960,7 @@ curses_keyname(VALUE obj, VALUE c)
  * Returns the number of lines on the screen
  */
 static VALUE
-curses_lines(void)
+curses_lines(VALUE self)
 {
     return INT2FIX(LINES);
 }
@@ -971,7 +971,7 @@ curses_lines(void)
  * Returns the number of columns on the screen
  */
 static VALUE
-curses_cols(void)
+curses_cols(VALUE self)
 {
     return INT2FIX(COLS);
 }
@@ -1559,7 +1559,7 @@ static VALUE
 curses_mousemask(VALUE obj, VALUE mask)
 {
     curses_stdscr();
-    return INT2NUM(mousemask(NUM2UINT(mask),NULL));
+    return ULONG2NUM(mousemask(NUM2UINT(mask),NULL));
 }
 
 #define DEFINE_MOUSE_GET_MEMBER(func_name,mem) \
@@ -1600,7 +1600,12 @@ DEFINE_MOUSE_GET_MEMBER(curs_mouse_z, z)
  * Returns the current mouse's button state.  Use this with the button state
  * constants to determine which buttons were pressed.
  */
-DEFINE_MOUSE_GET_MEMBER(curs_mouse_bstate, bstate)
+static VALUE curs_mouse_bstate(VALUE mouse)
+{
+    struct mousedata *mdata;
+    GetMOUSE(mouse, mdata);
+    return ULONG2NUM(mdata->mevent->bstate);
+}
 #undef define_curs_mouse_member
 #endif /* USE_MOUSE */
 
@@ -1692,7 +1697,7 @@ window_initialize(VALUE obj, VALUE h, VALUE w, VALUE top, VALUE left)
     struct windata *winp;
     WINDOW *window;
 
-    curses_init_screen();
+    curses_init_screen(Qnil);
     TypedData_Get_Struct(obj, struct windata, &windata_type, winp);
     if (winp->window) delwin(winp->window);
     window = newwin(NUM2INT(h), NUM2INT(w), NUM2INT(top), NUM2INT(left));
@@ -2932,7 +2937,7 @@ pad_initialize(VALUE obj, VALUE h, VALUE w)
     struct windata *padp;
     WINDOW *window;
 
-    curses_init_screen();
+    curses_init_screen(Qnil);
     TypedData_Get_Struct(obj, struct windata, &windata_type, padp);
     if (padp->window) delwin(padp->window);
     window = newpad(NUM2INT(h), NUM2INT(w));
@@ -3103,7 +3108,7 @@ item_initialize(VALUE obj, VALUE name, VALUE description)
 {
     struct itemdata *itemp;
 
-    curses_init_screen();
+    curses_init_screen(Qnil);
     TypedData_Get_Struct(obj, struct itemdata, &itemdata_type, itemp);
     if (itemp->item) {
 	rb_raise(rb_eRuntimeError, "already initialized item");
@@ -3316,7 +3321,7 @@ menu_initialize(VALUE obj, VALUE items)
     ID id_new;
 
     Check_Type(items, T_ARRAY);
-    curses_init_screen();
+    curses_init_screen(Qnil);
     TypedData_Get_Struct(obj, struct menudata, &menudata_type, menup);
     if (menup->menu) {
 	rb_raise(rb_eRuntimeError, "already initialized menu");
@@ -3772,7 +3777,7 @@ field_initialize(VALUE obj, VALUE height, VALUE width,
 {
     struct fielddata *fieldp;
 
-    curses_init_screen();
+    curses_init_screen(Qnil);
     TypedData_Get_Struct(obj, struct fielddata, &fielddata_type, fieldp);
     if (fieldp->field) {
 	rb_raise(rb_eRuntimeError, "already initialized field");
@@ -4230,7 +4235,7 @@ form_initialize(VALUE obj, VALUE fields)
     int i;
 
     Check_Type(fields, T_ARRAY);
-    curses_init_screen();
+    curses_init_screen(Qnil);
     TypedData_Get_Struct(obj, struct formdata, &formdata_type, formp);
     if (formp->form) {
 	rb_raise(rb_eRuntimeError, "already initialized form");
@@ -4730,7 +4735,7 @@ Init_curses(void)
     rb_define_module_function(mCurses, "init_screen", curses_init_screen, 0);
     rb_define_module_function(mCurses, "close_screen", curses_close_screen, 0);
     rb_define_module_function(mCurses, "closed?", curses_closed, 0);
-    rb_define_module_function(mCurses, "stdscr", curses_stdscr, 0);
+    rb_define_module_function(mCurses, "stdscr", curses_init_screen, 0);
     rb_define_module_function(mCurses, "refresh", curses_refresh, 0);
     rb_define_module_function(mCurses, "doupdate", curses_doupdate, 0);
     rb_define_module_function(mCurses, "clear", curses_clear, 0);
@@ -4870,7 +4875,7 @@ Init_curses(void)
      *   win.close
      *
      */
-    cWindow = rb_define_class_under(mCurses, "Window", rb_cData);
+    cWindow = rb_define_class_under(mCurses, "Window", rb_cObject);
     rb_define_alloc_func(cWindow, window_s_allocate);
     rb_define_method(cWindow, "initialize", window_initialize, 4);
     rb_define_method(cWindow, "subwin", window_subwin, 4);
@@ -4954,7 +4959,7 @@ Init_curses(void)
 #endif
 
 #ifdef HAVE_MENU
-    cItem = rb_define_class_under(mCurses, "Item", rb_cData);
+    cItem = rb_define_class_under(mCurses, "Item", rb_cObject);
     rb_define_alloc_func(cItem, item_s_allocate);
     rb_define_method(cItem, "initialize", item_initialize, 2);
     rb_define_method(cItem, "==", item_eq, 1);
@@ -4965,7 +4970,7 @@ Init_curses(void)
     rb_define_method(cItem, "opts_off", item_opts_off_m, 1);
     rb_define_method(cItem, "opts", item_opts_m, 0);
 
-    cMenu = rb_define_class_under(mCurses, "Menu", rb_cData);
+    cMenu = rb_define_class_under(mCurses, "Menu", rb_cObject);
     rb_define_alloc_func(cMenu, menu_s_allocate);
     rb_define_method(cMenu, "initialize", menu_initialize, 1);
     rb_define_method(cMenu, "post", menu_post, 0);
@@ -4988,7 +4993,7 @@ Init_curses(void)
 #endif
 
 #ifdef HAVE_FORM
-    cField = rb_define_class_under(mCurses, "Field", rb_cData);
+    cField = rb_define_class_under(mCurses, "Field", rb_cObject);
     rb_define_alloc_func(cField, field_s_allocate);
     rb_define_method(cField, "initialize", field_initialize, 6);
     rb_define_method(cField, "set_buffer", field_set_buffer, 2);
@@ -5015,7 +5020,7 @@ Init_curses(void)
     rb_define_method(cField, "max=", field_set_max, 1);
     rb_define_method(cField, "set_type", field_set_type, -1);
 
-    cForm = rb_define_class_under(mCurses, "Form", rb_cData);
+    cForm = rb_define_class_under(mCurses, "Form", rb_cObject);
     rb_define_alloc_func(cForm, form_s_allocate);
     rb_define_method(cForm, "initialize", form_initialize, 1);
     rb_define_method(cForm, "post", form_post, 0);
