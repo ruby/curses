@@ -82,18 +82,18 @@
 # define USE_MOUSE 1
 #endif
 
-#define NUM2CH NUM2CHR
-#define CH2FIX CHR2FIX
-
 #define OBJ2CHTYPE rb_obj2chtype_inline
 
 static inline chtype
 rb_obj2chtype_inline(VALUE x)
 {
-    if (RB_TYPE_P(x, RUBY_T_STRING) && (RSTRING_LEN(x)>=1))
-        return RSTRING_PTR(x)[0];
-    else
-        return NUM2CHTYPE(x);
+    if (RB_TYPE_P(x, RUBY_T_STRING)) {
+	ID id_ord;
+
+	CONST_ID(id_ord, "ord");
+	x = rb_funcall(x, id_ord, 0);
+    }
+    return NUM2CHTYPE(x);
 }
 
 static VALUE mCurses;
@@ -758,7 +758,7 @@ static VALUE
 curses_inch(VALUE obj)
 {
     curses_stdscr();
-    return CH2FIX(inch());
+    return CHTYPE2NUM(inch());
 }
 
 /*
@@ -1117,7 +1117,7 @@ curses_bkgdset(VALUE obj, VALUE ch)
 {
 #ifdef HAVE_BKGDSET
     curses_stdscr();
-    bkgdset(NUM2CHTYPE(ch));
+    bkgdset(OBJ2CHTYPE(ch));
 #endif
     return Qnil;
 }
@@ -1138,7 +1138,7 @@ curses_bkgd(VALUE obj, VALUE ch)
 {
 #ifdef HAVE_BKGD
     curses_stdscr();
-    return (bkgd(NUM2CHTYPE(ch)) == OK) ? Qtrue : Qfalse;
+    return (bkgd(OBJ2CHTYPE(ch)) == OK) ? Qtrue : Qfalse;
 #else
     return Qfalse;
 #endif
@@ -2194,7 +2194,7 @@ window_begx(VALUE obj)
 
 /*
  * Document-method: Curses::Window.box
- * call-seq: box(vert, hor)
+ * call-seq: box(vert = nil, hor = nil, corn = nil)
  *
  * set the characters to frame the window in.
  * The vertical +vert+ and horizontal +hor+ character.
@@ -2209,16 +2209,18 @@ window_box(int argc, VALUE *argv, VALUE self)
     struct windata *winp;
     VALUE vert, hor, corn;
 
-    rb_scan_args(argc, argv, "21", &vert, &hor, &corn);
+    rb_scan_args(argc, argv, "03", &vert, &hor, &corn);
 
     GetWINDOW(self, winp);
-    box(winp->window, NUM2CH(vert), NUM2CH(hor));
+    box(winp->window,
+	NIL_P(vert) ? 0 : OBJ2CHTYPE(vert),
+	NIL_P(hor) ? 0 : OBJ2CHTYPE(hor));
 
     if (!NIL_P(corn)) {
 	int cur_x, cur_y, x, y;
 	chtype c;
 
-	c = NUM2CH(corn);
+	c = OBJ2CHTYPE(corn);
 	getyx(winp->window, cur_y, cur_x);
 	x = NUM2INT(window_maxx(self)) - 1;
 	y = NUM2INT(window_maxy(self)) - 1;
@@ -2285,7 +2287,7 @@ window_inch(VALUE obj)
     struct windata *winp;
 
     GetWINDOW(obj, winp);
-    return CH2FIX(winch(winp->window));
+    return CHTYPE2NUM(winch(winp->window));
 }
 
 /*
@@ -2302,7 +2304,7 @@ window_addch(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj, winp);
-    waddch(winp->window, NUM2CHTYPE(ch));
+    waddch(winp->window, OBJ2CHTYPE(ch));
 
     return Qnil;
 }
@@ -2320,7 +2322,7 @@ window_insch(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj, winp);
-    winsch(winp->window, NUM2CH(ch));
+    winsch(winp->window, OBJ2CHTYPE(ch));
 
     return Qnil;
 }
@@ -2748,7 +2750,7 @@ window_bkgdset(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    wbkgdset(winp->window, NUM2CHTYPE(ch));
+    wbkgdset(winp->window, OBJ2CHTYPE(ch));
 #endif
     return Qnil;
 }
@@ -2769,7 +2771,7 @@ window_bkgd(VALUE obj, VALUE ch)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    return (wbkgd(winp->window, NUM2CHTYPE(ch)) == OK) ? Qtrue : Qfalse;
+    return (wbkgd(winp->window, OBJ2CHTYPE(ch)) == OK) ? Qtrue : Qfalse;
 #else
     return Qfalse;
 #endif
