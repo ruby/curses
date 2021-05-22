@@ -1,3 +1,10 @@
+### 1.4.1 / 2021-05-22
+
+Bug fixes:
+
+* Use chtype instead of char to support attributes
+* Fixes for Ruby 3.1.
+
 ### 1.4.0 / 2020-12-10
 
 New features:
