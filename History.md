@@ -1,3 +1,10 @@
+### 1.4.2 / 2021-06-14
+
+New features:
+
+* Added samples for addch, attron, mouse tracking and colors.
+  Pull request #62 by coezbek.
+
 ### 1.4.1 / 2021-05-22
 
 Bug fixes:
