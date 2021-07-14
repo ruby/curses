@@ -621,6 +621,20 @@ curses_nonl(VALUE obj)
 }
 
 /*
+ * Document-method: Curses.flushinp
+ *
+ * The flushinp routine throws away any typeahead that has been
+ * typed by the user and has not yet been read by the program.
+ */
+static VALUE
+curses_flushinp(VALUE obj)
+{
+    curses_stdscr();
+    flushinp();
+    return Qnil;
+}
+
+/*
  * Document-method: Curses.beep
  *
  * Sounds an audible alarm on the terminal, if possible;
@@ -4753,6 +4767,7 @@ Init_curses(void)
     rb_define_module_function(mCurses, "nocrmode", curses_nocbreak, 0);
     rb_define_module_function(mCurses, "nl", curses_nl, 0);
     rb_define_module_function(mCurses, "nonl", curses_nonl, 0);
+    rb_define_module_function(mCurses, "flushinp", curses_flushinp, 0);
     rb_define_module_function(mCurses, "beep", curses_beep, 0);
     rb_define_module_function(mCurses, "flash", curses_flash, 0);
     rb_define_module_function(mCurses, "ungetch", curses_ungetch, 1);
