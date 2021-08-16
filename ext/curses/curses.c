@@ -621,6 +621,20 @@ curses_nonl(VALUE obj)
 }
 
 /*
+ * Document-method: Curses.flushinp
+ *
+ * The flushinp routine throws away any typeahead that has been
+ * typed by the user and has not yet been read by the program.
+ */
+static VALUE
+curses_flushinp(VALUE obj)
+{
+    curses_stdscr();
+    flushinp();
+    return Qnil;
+}
+
+/*
  * Document-method: Curses.beep
  *
  * Sounds an audible alarm on the terminal, if possible;
@@ -3619,6 +3633,121 @@ menu_set_format(VALUE obj, VALUE rows, VALUE cols)
 }
 
 /*
+ * Document-method: Curses::Menu#mark=
+ *
+ * call-seq:
+ *   mark=(str)
+ *
+ * Set the mark string to distinguish the selected items
+ */
+static VALUE
+menu_set_mark(VALUE obj, VALUE mark)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    set_menu_mark(menup->menu, StringValueCStr(mark));
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Menu#mark
+ *
+ * call-seq:
+ *   mark
+ *
+ * Get the Menu's mark string
+ */
+static VALUE
+menu_get_mark(VALUE obj)
+{
+    struct menudata *menup;
+    const char *mark;
+
+    GetMENU(obj, menup);
+    mark = menu_mark(menup->menu);
+
+    return rb_external_str_new_with_enc(mark, strlen(mark), terminal_encoding);
+}
+
+/*
+ * Document-method: Curses::Menu#fore=
+ *
+ * call-seq:
+ *   fore=(attr)
+ *
+ * Sets the foreground attribute of menu.
+ * This is the highlight used for selected menu items.
+ */
+static VALUE
+menu_set_fore(VALUE obj, VALUE attr)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    set_menu_fore(menup->menu, NUM2CHTYPE(attr));
+
+    return attr;
+}
+
+/*
+ * Document-method: Curses::Menu#fore
+ *
+ * call-seq:
+ *   fore
+ *
+ * Sets the foreground attribute of menu.
+ * This is the highlight used for selected menu items.
+ */
+static VALUE
+menu_get_fore(VALUE obj, VALUE attr)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+
+    return CHTYPE2NUM(menu_fore(menup->menu));
+}
+
+/*
+ * Document-method: Curses::Menu#set_back
+ *
+ * call-seq:
+ *   set_back(attr)
+ *
+ * Get the background attribute of menu.
+ */
+static VALUE
+menu_set_back(VALUE obj, VALUE attr)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+    CHTYPE2NUM(set_menu_back(menup->menu, NUM2CHTYPE(attr)));
+
+    return attr;
+}
+
+/*
+ * Document-method: Curses::Menu#back
+ *
+ * call-seq:
+ *   back
+ *
+ * Get the background attribute of menu.
+ */
+static VALUE
+menu_get_back(VALUE obj, VALUE attr)
+{
+    struct menudata *menup;
+
+    GetMENU(obj, menup);
+
+    return CHTYPE2NUM(menu_back(menup->menu));
+}
+
+/*
  * Document-method: Curses::Menu#format
  *
  * call-seq:
@@ -4753,6 +4882,7 @@ Init_curses(void)
     rb_define_module_function(mCurses, "nocrmode", curses_nocbreak, 0);
     rb_define_module_function(mCurses, "nl", curses_nl, 0);
     rb_define_module_function(mCurses, "nonl", curses_nonl, 0);
+    rb_define_module_function(mCurses, "flushinp", curses_flushinp, 0);
     rb_define_module_function(mCurses, "beep", curses_beep, 0);
     rb_define_module_function(mCurses, "flash", curses_flash, 0);
     rb_define_module_function(mCurses, "ungetch", curses_ungetch, 1);
@@ -4988,6 +5118,12 @@ Init_curses(void)
     rb_define_method(cMenu, "scale", menu_scale, 0);
     rb_define_method(cMenu, "set_format", menu_set_format, 2);
     rb_define_method(cMenu, "format", menu_format_m, 0);
+    rb_define_method(cMenu, "mark=", menu_set_mark, 1);
+    rb_define_method(cMenu, "mark", menu_get_mark, 0);
+    rb_define_method(cMenu, "fore=", menu_set_fore, 1);
+    rb_define_method(cMenu, "fore", menu_get_fore, 0);
+    rb_define_method(cMenu, "back=", menu_set_back, 1);
+    rb_define_method(cMenu, "back", menu_get_back, 0);
     rb_define_method(cMenu, "set_opts", menu_set_opts, 1);
     rb_define_method(cMenu, "opts_on", menu_opts_on_m, 1);
     rb_define_method(cMenu, "opts_off", menu_opts_off_m, 1);
