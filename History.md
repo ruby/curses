@@ -1,3 +1,10 @@
+### 1.4.3 / 2022-01-06
+
+New features:
+
+* Added flushinp, menu mark, fore and back functions.
+  Pull request #66 by Isty001.
+
 ### 1.4.2 / 2021-06-14
 
 New features:
