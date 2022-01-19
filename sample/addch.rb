@@ -1,4 +1,7 @@
-require_relative "../lib/curses"
+#!/usr/bin/env ruby
+# require_relative "../lib/curses"
+require 'curses'
+
 include Curses
 
 init_screen
