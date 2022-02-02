@@ -1366,9 +1366,9 @@ curses_can_change_color(VALUE obj)
     return can_change_color() ? Qtrue : Qfalse;
 }
 
-#if defined(HAVE_COLORS)
+#if defined(HAVE_COLORS) || defined(COLORS)
 /*
- * Document-method: Curses.color
+ * Document-method: Curses.colors
  *
  * returns COLORS
  */
@@ -1398,7 +1398,7 @@ curses_color_content(VALUE obj, VALUE color)
 }
 
 
-#if defined(HAVE_COLOR_PAIRS)
+#if defined(HAVE_COLOR_PAIRS) || defined(COLOR_PAIRS)
 /*
  * Document-method: Curses.color_pairs
  *
