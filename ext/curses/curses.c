@@ -1366,7 +1366,7 @@ curses_can_change_color(VALUE obj)
     return can_change_color() ? Qtrue : Qfalse;
 }
 
-#if defined(HAVE_COLORS)
+#if defined(HAVE_COLORS) || defined(COLORS)
 /*
  * Document-method: Curses.color
  *
