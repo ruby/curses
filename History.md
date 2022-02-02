@@ -1,3 +1,12 @@
+### 1.4.4 / 2022-02-03
+
+Bug fixes:
+
+* Define Curses.colors even if COLORS is a macro.
+  Issue #69 by dvarrui.
+* Use require instead of require_relative.
+  Pull request #68 by dvarrui.
+
 ### 1.4.3 / 2022-01-06
 
 New features:
