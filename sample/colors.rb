@@ -3,14 +3,6 @@
 require "curses"
 include Curses
 
-def colors
-  return 256
-end
-
-def Curses.colors
-  return 256
-end
-
 begin
   init_screen
 
