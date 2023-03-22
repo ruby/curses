@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require "curses"
 
 Curses.init_screen
