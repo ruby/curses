@@ -4800,11 +4800,11 @@ curses_save_key_modifiers(VALUE obj, VALUE flag)
  * == Examples
  *
  * * hello.rb
- *     :include: sample/hello.rb
+ *     :include: ../../sample/hello.rb
  *
  *
  * * rain.rb
- *     :include: sample/rain.rb
+ *     :include: ../../sample/rain.rb
  *
  *
  */
@@ -4844,7 +4844,7 @@ Init_curses(void)
      * == Example
      *
      * * mouse.rb
-     *     :include: sample/mouse.rb
+     *     :include: ../../sample/mouse.rb
      *
      */
     cMouseEvent = rb_define_class_under(mCurses,"MouseEvent",rb_cObject);
