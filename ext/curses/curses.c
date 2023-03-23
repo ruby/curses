@@ -3252,7 +3252,7 @@ item_opts_off_m(VALUE obj, VALUE opts)
  * Get the current option bits of the item.
  */
 static VALUE
-item_opts_m(VALUE obj, VALUE opts)
+item_opts_m(VALUE obj)
 {
     struct itemdata *itemp;
 
@@ -3701,7 +3701,7 @@ menu_set_fore(VALUE obj, VALUE attr)
  * This is the highlight used for selected menu items.
  */
 static VALUE
-menu_get_fore(VALUE obj, VALUE attr)
+menu_get_fore(VALUE obj)
 {
     struct menudata *menup;
 
@@ -3738,7 +3738,7 @@ menu_set_back(VALUE obj, VALUE attr)
  * Get the background attribute of menu.
  */
 static VALUE
-menu_get_back(VALUE obj, VALUE attr)
+menu_get_back(VALUE obj)
 {
     struct menudata *menup;
 
@@ -3835,7 +3835,7 @@ menu_opts_off_m(VALUE obj, VALUE opts)
  * Get the current option bits of the menu.
  */
 static VALUE
-menu_opts_m(VALUE obj, VALUE opts)
+menu_opts_m(VALUE obj)
 {
     struct menudata *menup;
 
