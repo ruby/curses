@@ -45,7 +45,7 @@ while ch = Curses.get_char
     else
       form.driver(ch)
     end
-  rescue Curses::RequestDeniedError
+  rescue Curses::RequestDeniedError, Curses::UnknownCommandError
   end
 end
 
