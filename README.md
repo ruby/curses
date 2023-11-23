@@ -37,6 +37,13 @@ However, if you prefer ncurses to PDCurses, specify the following option:
 
 On mingw, you need DevKit to compile the extension library.
 
+On MacOS, `ncurses` menu isn't natively supported. You can install the gem with menu support using homebrew:
+
+    brew install ncurses
+    gem install curses -- --use-system-libraries --with-ncurses-dir=/usr/local/opt/ncurses
+
+_with `/usr/local/opt/ncurses` the path where homebrew installed ncurses on your machine_
+
 ## Documentation
 
 See [https://www.rubydoc.info/gems/curses](https://www.rubydoc.info/gems/curses).
