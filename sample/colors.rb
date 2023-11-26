@@ -3,6 +3,9 @@
 require "curses"
 include Curses
 
+# The TERM environment variable should be set to xterm-256color etc. to
+# use 256 colors.  Curses.colors returns the color numbers of the terminal.
+
 begin
   init_screen
 
