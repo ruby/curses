@@ -1,3 +1,6 @@
+This file is no longer being updated after version 1.4.5.
+For changes since version 1.4.5, see <URL:https://github.com/ruby/curses/releases>.
+
 ### 1.4.5 / 2024-04-24
 
 New features:
