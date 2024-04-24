@@ -1,3 +1,23 @@
+### 1.4.5 / 2024-04-24
+
+New features:
+
+* Add documentation of TERM.
+  Issue #80 by rubyFeedback.
+* Add MacOS directives to install curses with menu support
+  Pull request #84 by AlexB52.
+
+Bug fixes:
+
+* Add x permissoin to samples.
+  Pull request #71 by dvarrui.
+* Supress gem installation warning.
+  Issue #77 by rubyFeedback.
+* Ignore Curses::UnknownCommandError.
+  Issue #79 by rubyFeedback.
+* Fix installation problem on macOS (Apple Silicon).
+  Issue #85 by pusewicz.
+
 ### 1.4.4 / 2022-02-03
 
 Bug fixes:
