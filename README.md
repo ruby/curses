@@ -48,6 +48,10 @@ _with `/usr/local/opt/ncurses` the path where homebrew installed ncurses on your
 
 See [https://www.rubydoc.info/gems/curses](https://www.rubydoc.info/gems/curses).
 
+## Limitations
+
+* curses.gem doesn't support more than 256 color pairs.  See https://reversed.top/2019-02-05/more-than-256-curses-color-pairs/ for details.
+
 ## Developers
 
 After checking out the repo, run `bundle install` to install dependencies.
@@ -55,6 +59,7 @@ After checking out the repo, run `bundle install` to install dependencies.
 To compile the extension library, run `bundle exec rake compile`.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `curses.gemspec`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
 ## License
 
 curses is released under the Ruby and 2-clause BSD licenses.  See COPYING for
