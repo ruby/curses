@@ -1443,7 +1443,7 @@ curses_pair_content(VALUE obj, VALUE pair)
 static VALUE
 curses_color_pair(VALUE obj, VALUE attrs)
 {
-    return INT2FIX(COLOR_PAIR(NUM2INT(attrs)));
+    return CHTYPE2NUM(COLOR_PAIR(NUM2CHTYPE(attrs)));
 }
 
 /*
@@ -1456,7 +1456,7 @@ static VALUE
 curses_pair_number(VALUE obj, VALUE attrs)
 {
     curses_stdscr();
-    return INT2FIX(PAIR_NUMBER(NUM2LONG(attrs)));
+    return INT2FIX(PAIR_NUMBER(NUM2CHTYPE(attrs)));
 }
 #endif /* USE_COLOR */
 
@@ -2672,7 +2672,7 @@ window_attroff(VALUE obj, VALUE attrs)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    return INT2FIX(wattroff(winp->window,NUM2INT(attrs)));
+    return INT2FIX(wattroff(winp->window,NUM2CHTYPE(attrs)));
 #else
     return Qtrue;
 #endif
@@ -2695,10 +2695,10 @@ window_attron(VALUE obj, VALUE attrs)
     VALUE val;
 
     GetWINDOW(obj,winp);
-    val = INT2FIX(wattron(winp->window,NUM2INT(attrs)));
+    val = INT2FIX(wattron(winp->window,NUM2CHTYPE(attrs)));
     if (rb_block_given_p()) {
 	rb_yield(val);
-	wattroff(winp->window,NUM2INT(attrs));
+	wattroff(winp->window,NUM2CHTYPE(attrs));
 	return val;
     }
     else{
@@ -2742,7 +2742,7 @@ window_attrset(VALUE obj, VALUE attrs)
     struct windata *winp;
 
     GetWINDOW(obj,winp);
-    return INT2FIX(wattrset(winp->window,NUM2INT(attrs)));
+    return INT2FIX(wattrset(winp->window,NUM2CHTYPE(attrs)));
 #else
     return Qtrue;
 #endif
