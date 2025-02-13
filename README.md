@@ -46,7 +46,9 @@ _with `/usr/local/opt/ncurses` the path where homebrew installed ncurses on your
 
 ## Documentation
 
-See [https://www.rubydoc.info/gems/curses](https://www.rubydoc.info/gems/curses).
+Type the following command, and see `[rdoc]` of curses:
+
+    > gem server -l
 
 ## Developers
 
