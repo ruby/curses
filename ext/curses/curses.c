@@ -2811,6 +2811,31 @@ window_getbkgd(VALUE obj)
 }
 
 /*
+ * Document-method: Curses::Window.chgat
+ * call-seq: chgat(n, attrs)
+ *
+ * Changes the attributes of a given number of characters starting at
+ * the current cursor location.
+ */
+static VALUE
+window_chgat(VALUE obj, VALUE n, VALUE attrs)
+{
+#ifdef HAVE_WCHGAT
+    chtype a = NUM2CHTYPE(attrs);
+    attr_t attr;
+    short pair;
+    struct windata *winp;
+
+    GetWINDOW(obj,winp);
+    attr = a & A_ATTRIBUTES;
+    pair = PAIR_NUMBER(attr);
+    return (wchgat(winp->window, NUM2INT(n), attr, pair, NULL) == OK) ? Qtrue : Qfalse;
+#else
+    return Qnil;
+#endif
+}
+
+/*
  * Document-method: Curses::Window.resize
  * call-seq: resize(lines, cols)
  *
@@ -5064,6 +5089,7 @@ Init_curses(void)
     rb_define_method(cWindow, "bkgdset", window_bkgdset, 1);
     rb_define_method(cWindow, "bkgd", window_bkgd, 1);
     rb_define_method(cWindow, "getbkgd", window_getbkgd, 0);
+    rb_define_method(cWindow, "chgat", window_chgat, 2);
 
     rb_define_method(cWindow, "nodelay=", window_nodelay, 1);
     rb_define_method(cWindow, "timeout=", window_timeout, 1);
