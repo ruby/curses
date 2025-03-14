@@ -221,7 +221,7 @@ if header_library
     have_func("form_driver_w")
   end
 
-  ["WINDOW", "MEVENT", "ITEM", "MENU", "FIELD", "FORM"].each do |type|
+  ["WINDOW", "MEVENT", "ITEM", "MENU", "FIELD", "FORM", "SCREEN"].each do |type|
     checking_for("sizeof(#{type}) is available") {
       if try_compile(<<EOF, Shellwords.join($defs))
 #if defined(HAVE_PDCURSES_H)
