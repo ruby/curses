@@ -87,3 +87,10 @@ if defined?(Curses::Menu)
   end
 end
 
+module Curses
+  module_function
+
+  def chgat(...)
+    Curses.stdscr.chgat(...)
+  end
+end
