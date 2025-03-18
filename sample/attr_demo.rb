@@ -27,7 +27,7 @@ begin
   }
   getch
   setpos(0, 0)
-  Curses.stdscr.chgat(6, A_UNDERLINE)
+  chgat(6, A_UNDERLINE)
   getch
 ensure
   close_screen
