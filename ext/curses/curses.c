@@ -98,6 +98,7 @@ rb_obj2chtype_inline(VALUE x)
 
 static VALUE mCurses;
 static VALUE mKey;
+static VALUE cScreen;
 static VALUE cWindow;
 static VALUE cPad;
 #ifdef USE_MOUSE
@@ -220,6 +221,7 @@ check_curses_error(int error)
 
 struct windata {
     WINDOW *window;
+    int is_stdscr;
 };
 
 static VALUE window_attroff(VALUE obj, VALUE attrs);
@@ -242,7 +244,7 @@ static void
 window_free(void *p)
 {
     struct windata *winp = p;
-    if (winp->window && winp->window != stdscr) delwin(winp->window);
+    if (winp->window && !winp->is_stdscr) delwin(winp->window);
     winp->window = 0;
     xfree(winp);
 }
@@ -263,7 +265,7 @@ static const rb_data_type_t windata_type = {
 };
 
 static VALUE
-prep_window(VALUE class, WINDOW *window)
+prep_window(VALUE class, WINDOW *window, int is_stdscr)
 {
     VALUE obj;
     struct windata *winp;
@@ -275,6 +277,7 @@ prep_window(VALUE class, WINDOW *window)
     obj = rb_obj_alloc(class);
     TypedData_Get_Struct(obj, struct windata, &windata_type, winp);
     winp->window = window;
+    winp->is_stdscr = is_stdscr;
 
     return obj;
 }
@@ -311,7 +314,7 @@ curses_init_screen(VALUE self)
     }
     rb_set_end_proc(curses_finalize, 0);
     clear();
-    rb_stdscr = prep_window(cWindow, stdscr);
+    rb_stdscr = prep_window(cWindow, stdscr, 1);
     return rb_stdscr;
 }
 
@@ -1683,6 +1686,117 @@ curses_reset_prog_mode(VALUE obj)
 #define curses_reset_prog_mode rb_f_notimplement
 #endif
 
+/*-------------------------- class Screen --------------------------*/
+
+struct screendata {
+    SCREEN *screen;
+    VALUE stdscr;
+};
+
+NORETURN(static void no_screen(void));
+static void
+no_screen(void)
+{
+    rb_raise(rb_eRuntimeError, "no screen");
+}
+
+#define GetSCREEN(obj, screenp) do {\
+    TypedData_Get_Struct((obj), struct screendata, &screendata_type, (screenp));\
+    if ((screenp)->screen == 0) no_screen();\
+} while (0)
+
+static void
+screen_gc_mark(void *p)
+{
+    struct screendata *screenp = p;
+
+    rb_gc_mark(screenp->stdscr);
+}    
+
+static void
+screen_free(void *p)
+{
+    struct screendata *screenp = p;
+    if (screenp->screen) delscreen(screenp->screen);
+    screenp->screen = 0;
+    xfree(screenp);
+}
+
+static size_t
+screen_memsize(const void *p)
+{
+    const struct screendata *screenp = p;
+    size_t size = sizeof(*screenp);
+    if (!screenp) return 0;
+    if (screenp->screen) size += CURSES_SIZEOF_SCREEN;
+    return size;
+}
+
+static const rb_data_type_t screendata_type = {
+    "screendata",
+    {screen_gc_mark, screen_free, screen_memsize,}
+};
+
+/* returns a Curses::Screen object */
+static VALUE
+screen_s_allocate(VALUE class)
+{
+    struct screendata *screenp;
+
+    return TypedData_Make_Struct(class, struct screendata, &screendata_type, screenp);
+}
+
+/*
+ * Document-method: Curses::Screen.new
+ * call-seq: new(outf, inf, type=nil)
+ *
+ * Construct a new Curses::Screen.
+ */
+static VALUE
+screen_initialize(int argc, VALUE *argv, VALUE obj)
+{
+    VALUE outf, inf, type;
+    struct screendata *screenp;
+    rb_io_t *outfptr, *infptr;
+
+    rb_scan_args(argc, argv, "21", &outf, &inf, &type);
+    TypedData_Get_Struct(obj, struct screendata, &screendata_type, screenp);
+    if (screenp->screen) delscreen(screenp->screen);
+    Check_Type(outf, T_FILE);
+    RB_IO_POINTER(outf, outfptr);
+    rb_io_check_writable(outfptr);
+    Check_Type(inf, T_FILE);
+    RB_IO_POINTER(inf, infptr);
+    rb_io_check_readable(infptr);
+    screenp->screen = newterm(NIL_P(type) ? NULL : StringValueCStr(type),
+                              rb_io_stdio_file(outfptr),
+                              rb_io_stdio_file(infptr));
+    screenp->stdscr = Qnil;
+
+    return obj;
+}
+
+/*
+ * Document-method: Curses::Screen.set_term
+ * call-seq: set_term
+ *
+ * Set the current terminal.
+ */
+static VALUE
+screen_set_term(VALUE obj)
+{
+    struct screendata *screenp;
+
+    GetSCREEN(obj, screenp);
+    set_term(screenp->screen);
+    if (NIL_P(screenp->stdscr)) {
+        screenp->stdscr = prep_window(cWindow, stdscr, 1);
+    }
+    rb_stdscr = screenp->stdscr;
+
+    return Qnil;
+}
+
 /*-------------------------- class Window --------------------------*/
 
 /* returns a Curses::Window object */
@@ -1743,7 +1857,7 @@ window_subwin(VALUE obj, VALUE height, VALUE width, VALUE top, VALUE left)
     l = NUM2INT(left);
     GetWINDOW(obj, winp);
     window = subwin(winp->window, h, w, t, l);
-    win = prep_window(rb_obj_class(obj), window);
+    win = prep_window(rb_obj_class(obj), window, 0);
 
     return win;
 }
@@ -1772,7 +1886,7 @@ window_derwin(VALUE obj, VALUE height, VALUE width, VALUE top, VALUE left)
     l = NUM2INT(left);
     GetWINDOW(obj, winp);
     window = derwin(winp->window, h, w, t, l);
-    win = prep_window(rb_obj_class(obj), window);
+    win = prep_window(rb_obj_class(obj), window, 0);
 
     return win;
 }
@@ -3011,7 +3125,7 @@ pad_subpad(VALUE obj, VALUE height, VALUE width, VALUE begin_x, VALUE begin_y)
     y = NUM2INT(begin_y);
     GetWINDOW(obj, padp);
     sub_pad = subpad(padp->window, h, w, x, y);
-    pad = prep_window(rb_obj_class(obj), sub_pad);
+    pad = prep_window(rb_obj_class(obj), sub_pad, 0);
 
     return pad;
 }
@@ -4997,6 +5111,32 @@ Init_curses(void)
          */
         rb_define_const(mCurses, "VERSION", version);
     }
+
+    /*
+     * Document-class: Curses::Screen
+     *
+     * == Description
+     *
+     * A Screen represents a terminal.
+     * A program that outputs to more than one terminal should create a Screen
+     *  for each terminal instead of calling Curses.init_screen.
+     *
+     * == Usage
+     *
+     *   require "curses"
+     *
+     *   screen = Screen.new(STDOUT, STDIN, "xterm")
+     *   screen.set_term
+     *   
+     *   Curses.addstr("Hit any key")
+     *   Curses.refresh
+     *   Curses.getch
+     *   Curses.close_screen
+     */
+    cScreen = rb_define_class_under(mCurses, "Screen", rb_cObject);
+    rb_define_alloc_func(cScreen, screen_s_allocate);
+    rb_define_method(cScreen, "initialize", screen_initialize, -1);
+    rb_define_method(cScreen, "set_term", screen_set_term, 0);
 
     /*
      * Document-class: Curses::Window
