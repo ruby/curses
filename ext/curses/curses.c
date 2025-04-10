@@ -98,9 +98,13 @@ rb_obj2chtype_inline(VALUE x)
 
 static VALUE mCurses;
 static VALUE mKey;
+#ifdef HAVE_NEWTERM
 static VALUE cScreen;
+#endif
 static VALUE cWindow;
+#ifdef HAVE_NEWPAD
 static VALUE cPad;
+#endif
 #ifdef USE_MOUSE
 static VALUE cMouseEvent;
 #endif
@@ -1688,6 +1692,8 @@ curses_reset_prog_mode(VALUE obj)
 
 /*-------------------------- class Screen --------------------------*/
 
+#ifdef HAVE_NEWTERM
+
 struct screendata {
     SCREEN *screen;
     VALUE stdscr;
@@ -1796,6 +1802,8 @@ screen_set_term(VALUE obj)
 
     return Qnil;
 }
+
+#endif /* HAVE_NEWTERM */
 
 /*-------------------------- class Window --------------------------*/
 
@@ -5112,6 +5120,7 @@ Init_curses(void)
         rb_define_const(mCurses, "VERSION", version);
     }
 
+#ifdef HAVE_NEWTERM
     /*
      * Document-class: Curses::Screen
      *
@@ -5137,6 +5146,7 @@ Init_curses(void)
     rb_define_alloc_func(cScreen, screen_s_allocate);
     rb_define_method(cScreen, "initialize", screen_initialize, -1);
     rb_define_method(cScreen, "set_term", screen_set_term, 0);
+#endif
 
     /*
      * Document-class: Curses::Window

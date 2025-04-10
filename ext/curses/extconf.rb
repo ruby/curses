@@ -122,7 +122,7 @@ if header_library
               def_prog_mode reset_prog_mode timeout wtimeout nodelay
               init_color wcolor_set use_default_colors assume_default_colors
               newpad unget_wch get_wch wget_wch PDC_get_key_modifiers
-              chgat wchgat)
+              chgat wchgat newterm)
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
   end
   convertible_int('chtype', [["#undef MOUSE_MOVED\n"]]+curses) or abort
