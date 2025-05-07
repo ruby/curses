@@ -21,6 +21,7 @@
 #include "ruby/thread.h"
 
 #if defined(HAVE_PDCURSES_H)
+# undef MOUSE_MOVED
 # include <pdcurses.h>
 #elif defined(HAVE_NCURSESW_CURSES_H)
 # include <ncursesw/curses.h>
