@@ -43,7 +43,6 @@ $library_candidates = [
 $mingw = /mingw/ =~ RUBY_PLATFORM
 $mswin = /mswin/ =~ RUBY_PLATFORM
 $windows = $mingw || $mswin
-$x64 = /x64/ =~ RUBY_PLATFORM
 $use_system_libs = arg_config('--use-system-libraries',
                               ENV.key?("CURSES_USE_SYSTEM_LIBRARIES"))
 $idefault = nil
@@ -62,16 +61,12 @@ if $use_bundled_pdcurses
   Dir.chdir(wincon_dir)
   begin
     if $mswin
-      exec_command "nmake -f Makefile.vc clean all WIDE=Y DLL=Y"
+      exec_command "nmake -f Makefile.vc WIDE=Y DLL=Y"
       FileUtils.cp("pdcurses.dll", pdcurses_dir)
       FileUtils.cp("pdcurses.lib", pdcurses_dir)
       $pdcurses_dll_default = true
     else
-      if $x64
-        exec_command "make -f Makefile.mng clean all _w64=1 WIDE=Y DLL=N"
-      else
-        exec_command "make -f Makefile.mng clean all WIDE=Y DLL=N"
-      end
+      exec_command "make WIDE=Y DLL=N"
       FileUtils.cp("pdcurses.a", File.expand_path("libpdcurses.a", pdcurses_dir))
     end
   ensure
