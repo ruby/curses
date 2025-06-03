@@ -67,11 +67,8 @@ if $use_bundled_pdcurses
       FileUtils.cp("pdcurses.lib", pdcurses_dir)
       $pdcurses_dll_default = true
     else
-      if $x64
-        exec_command "make -f Makefile.mng clean all _w64=1 WIDE=Y DLL=N"
-      else
-        exec_command "make -f Makefile.mng clean all WIDE=Y DLL=N"
-      end
+      w64 = $x64 ? "_w64=1" : ""
+      exec_command "make -f Makefile.mng clean all #{w64} WIDE=Y DLL=N CC=\"gcc -std=gnu17\""
       FileUtils.cp("pdcurses.a", File.expand_path("libpdcurses.a", pdcurses_dir))
     end
   ensure
