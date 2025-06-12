@@ -11,13 +11,12 @@ Gem::Specification.new { |s|
   s.require_path = "lib"
   s.required_ruby_version = Gem::Requirement.new('>= 3.0')
   s.licenses = ['Ruby', 'BSD-2-Clause']
-  s.homepage = "https://ruby.github.io/curses"
-  s.licenses = ["Ruby"]
+  s.homepage = "https://github.com/ruby/curses"
 
   s.metadata["homepage_uri"] = s.homepage
-  s.metadata["source_code_uri"] = "https://github.com/ruby/curses"
-  s.metadata["changelog_uri"] = "#{s.metadata['source_code_uri']}/releases"
-  s.metadata["documentation_uri"] = s.homepage
+  s.metadata["source_code_uri"] = s.homepage
+  s.metadata["changelog_uri"] = "#{s.homepage}/releases"
+  s.metadata["documentation_uri"] = "https://ruby.github.io/curses/"
 
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'rake'
