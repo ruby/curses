@@ -13,3 +13,4 @@
 /vendor/x64-mswin64*
 /ext/curses/Makefile
 .ruby-version
+_site
