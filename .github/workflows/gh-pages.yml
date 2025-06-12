@@ -28,6 +28,8 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
+      - name: Install dependencies
+        run: gem install rdoc
       - name: Build with RDoc
         # Outputs to the './_site' directory by default
         run: rake rdoc
