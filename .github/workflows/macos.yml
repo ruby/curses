@@ -7,6 +7,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v5
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.4
     - name: Install dependencies
       run: |
         gem install bundler --no-document
