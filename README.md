@@ -48,7 +48,8 @@ _with `/usr/local/opt/ncurses` the path where homebrew installed ncurses on your
 
 Type the following command, and see `[rdoc]` of curses:
 
-    > gem server -l
+    gem install rubygems-server
+    gem server -l
 
 ## Limitations
 
