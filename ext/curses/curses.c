@@ -1696,7 +1696,7 @@ curses_reset_prog_mode(VALUE obj)
 
 struct screendata {
     SCREEN *screen;
-    VALUE stdscr;
+    VALUE stdscr_value;
 };
 
 NORETURN(static void no_screen(void));
@@ -1716,7 +1716,7 @@ screen_gc_mark(void *p)
 {
     struct screendata *screenp = p;
 
-    rb_gc_mark(screenp->stdscr);
+    rb_gc_mark(screenp->stdscr_value);
 }    
 
 static void
@@ -1777,7 +1777,7 @@ screen_initialize(int argc, VALUE *argv, VALUE obj)
     screenp->screen = newterm(NIL_P(type) ? NULL : StringValueCStr(type),
                               rb_io_stdio_file(outfptr),
                               rb_io_stdio_file(infptr));
-    screenp->stdscr = Qnil;
+    screenp->stdscr_value = Qnil;
 
     return obj;
 }
@@ -1795,10 +1795,10 @@ screen_set_term(VALUE obj)
 
     GetSCREEN(obj, screenp);
     set_term(screenp->screen);
-    if (NIL_P(screenp->stdscr)) {
-        screenp->stdscr = prep_window(cWindow, stdscr, 1);
+    if (NIL_P(screenp->stdscr_value)) {
+        screenp->stdscr_value = prep_window(cWindow, stdscr, 1);
     }
-    rb_stdscr = screenp->stdscr;
+    rb_stdscr = screenp->stdscr_value;
 
     return Qnil;
 }
