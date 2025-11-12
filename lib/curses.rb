@@ -1,8 +1,8 @@
 pdcurses_dll = File.expand_path("../vendor/PDCurses/pdcurses.dll", __dir__)
 if File.exist?(pdcurses_dll)
   path = ENV["PATH"]
-  dir = File::ALT_SEPARATOR ?
-    File.dirname(pdcurses_dll).tr("/", File::ALT_SEPARATOR) : dir
+  dir = File.dirname(pdcurses_dll)
+  dir = dir.tr("/", File::ALT_SEPARATOR) if File::ALT_SEPARATOR
   dirs = path.split(File::PATH_SEPARATOR)
   if !dirs.include?(dir)
     ENV["PATH"] = [dir, *dirs].join(File::PATH_SEPARATOR)
