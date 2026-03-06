@@ -2952,6 +2952,64 @@ window_attrset(VALUE obj, VALUE attrs)
 }
 
 /*
+ * Document-method: Curses::Window.attr_set
+ * call-seq: attr_set(attrs, pair)
+ *
+ * Sets the current attributes and color pair of the given window.
+ * Unlike Curses::Window.attrset, this method accepts an extended color
+ * pair number (> 255) when the ncurses extended colors API is available.
+ *
+ * Returns +true+ on success, +false+ on failure.
+ *
+ * see also system manual curs_attr(3)
+ */
+#ifdef HAVE_WATTR_SET
+static VALUE
+window_attr_set(VALUE obj, VALUE attrs, VALUE pair)
+{
+    struct windata *winp;
+
+    GetWINDOW(obj, winp);
+    return (wattr_set(winp->window, NUM2UINT(attrs), NUM2INT(pair), NULL) == OK) ? Qtrue : Qfalse;
+}
+#else
+#define window_attr_set rb_f_notimplement
+#endif
+
+/*
+ * Document-method: Curses::Window.attr_get
+ * call-seq: attr_get => [attrs, pair]
+ *
+ * Returns a 2-element Array of the current attributes and color pair
+ * of the given window. The color pair number may exceed 255 when the
+ * ncurses extended colors API is available.
+ *
+ * Returns +nil+ on failure.
+ *
+ * see also system manual curs_attr(3)
+ */
+#ifdef HAVE_WATTR_GET
+static VALUE
+window_attr_get(VALUE obj)
+{
+    struct windata *winp;
+    attr_t attrs;
+#ifdef NCURSES_PAIRS_T
+    NCURSES_PAIRS_T pair;
+#else
+    short pair;
+#endif
+
+    GetWINDOW(obj, winp);
+    if (wattr_get(winp->window, &attrs, &pair, NULL) == ERR)
+	return Qnil;
+    return rb_ary_new3(2, UINT2NUM(attrs), INT2NUM(pair));
+}
+#else
+#define window_attr_get rb_f_notimplement
+#endif
+
+/*
  * Document-method: Curses::Window.bkgdset
  * call-seq: bkgdset(ch)
  *
@@ -5319,6 +5377,8 @@ Init_curses(void)
     rb_define_method(cWindow, "attroff", window_attroff, 1);
     rb_define_method(cWindow, "attron", window_attron, 1);
     rb_define_method(cWindow, "attrset", window_attrset, 1);
+    rb_define_method(cWindow, "attr_set", window_attr_set, 2);
+    rb_define_method(cWindow, "attr_get", window_attr_get, 0);
     rb_define_method(cWindow, "bkgdset", window_bkgdset, 1);
     rb_define_method(cWindow, "bkgd", window_bkgd, 1);
     rb_define_method(cWindow, "getbkgd", window_getbkgd, 0);
