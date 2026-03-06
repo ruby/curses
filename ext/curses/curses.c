@@ -2970,7 +2970,7 @@ window_attr_set(VALUE obj, VALUE attrs, VALUE pair)
     struct windata *winp;
 
     GetWINDOW(obj, winp);
-    return (wattr_set(winp->window, NUM2ULONG(attrs), NUM2INT(pair), NULL) == OK) ? Qtrue : Qfalse;
+    return (wattr_set(winp->window, NUM2UINT(attrs), NUM2INT(pair), NULL) == OK) ? Qtrue : Qfalse;
 }
 #else
 #define window_attr_set rb_f_notimplement
@@ -3003,7 +3003,7 @@ window_attr_get(VALUE obj)
     GetWINDOW(obj, winp);
     if (wattr_get(winp->window, &attrs, &pair, NULL) == ERR)
 	return Qnil;
-    return rb_ary_new3(2, ULONG2NUM(attrs), INT2FIX(pair));
+    return rb_ary_new3(2, UINT2NUM(attrs), INT2NUM(pair));
 }
 #else
 #define window_attr_get rb_f_notimplement
