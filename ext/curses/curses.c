@@ -2801,7 +2801,11 @@ window_color_set(VALUE obj, VALUE col)
     /* Use wattr_set to support pair numbers > 255; preserve existing attrs. */
     {
 	attr_t attrs;
+#ifdef NCURSES_PAIRS_T
 	NCURSES_PAIRS_T current_pair;
+#else
+	short current_pair;
+#endif
 	if (wattr_get(winp->window, &attrs, &current_pair, NULL) == ERR)
 	    return Qfalse;
 	return (wattr_set(winp->window, attrs, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
