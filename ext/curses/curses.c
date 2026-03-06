@@ -2970,8 +2970,6 @@ window_attr_set(VALUE obj, VALUE attrs, VALUE pair)
     GetWINDOW(obj, winp);
     return (wattr_set(winp->window, NUM2UINT(attrs), NUM2INT(pair), NULL) == OK) ? Qtrue : Qfalse;
 }
-#else
-#define window_attr_set rb_f_notimplement
 #endif
 
 /*
@@ -3003,8 +3001,6 @@ window_attr_get(VALUE obj)
 	return Qnil;
     return rb_ary_new3(2, UINT2NUM(attrs), INT2NUM(pair));
 }
-#else
-#define window_attr_get rb_f_notimplement
 #endif
 
 /*
@@ -5375,8 +5371,12 @@ Init_curses(void)
     rb_define_method(cWindow, "attroff", window_attroff, 1);
     rb_define_method(cWindow, "attron", window_attron, 1);
     rb_define_method(cWindow, "attrset", window_attrset, 1);
+#ifdef HAVE_WATTR_SET
     rb_define_method(cWindow, "attr_set", window_attr_set, 2);
+#endif
+#ifdef HAVE_WATTR_GET
     rb_define_method(cWindow, "attr_get", window_attr_get, 0);
+#endif
     rb_define_method(cWindow, "bkgdset", window_bkgdset, 1);
     rb_define_method(cWindow, "bkgd", window_bkgd, 1);
     rb_define_method(cWindow, "getbkgd", window_getbkgd, 0);
