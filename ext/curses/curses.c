@@ -82,6 +82,12 @@
 # define USE_MOUSE 1
 #endif
 
+#if defined(NCURSES_EXT_COLORS) && defined(NCURSES_EXT_FUNCS)
+# define SUPPORT_EXTENDED_COLORS 1
+#else
+# define SUPPORT_EXTENDED_COLORS 0
+#endif
+
 #define OBJ2CHTYPE rb_obj2chtype_inline
 
 static inline chtype
@@ -1321,7 +1327,7 @@ curses_init_pair(VALUE obj, VALUE pair, VALUE f, VALUE b)
 {
     /* may have to raise exception on ERR */
     curses_stdscr();
-#ifdef HAVE_INIT_EXTENDED_PAIR
+#if SUPPORT_EXTENDED_COLORS
     return (init_extended_pair(NUM2INT(pair), NUM2INT(f), NUM2INT(b)) == OK) ? Qtrue : Qfalse;
 #else
     return (init_pair(NUM2INT(pair),NUM2INT(f),NUM2INT(b)) == OK) ? Qtrue : Qfalse;
@@ -1349,7 +1355,7 @@ curses_init_color(VALUE obj, VALUE color, VALUE r, VALUE g, VALUE b)
 {
     /* may have to raise exception on ERR */
     curses_stdscr();
-#ifdef HAVE_INIT_EXTENDED_COLOR
+#if SUPPORT_EXTENDED_COLORS
     return (init_extended_color(NUM2INT(color), NUM2INT(r),
 				NUM2INT(g), NUM2INT(b)) == OK) ? Qtrue : Qfalse;
 #else
@@ -1407,7 +1413,7 @@ static VALUE
 curses_color_content(VALUE obj, VALUE color)
 {
     curses_stdscr();
-#ifdef HAVE_EXTENDED_COLOR_CONTENT
+#if SUPPORT_EXTENDED_COLORS
     {
 	int r, g, b;
 	if (extended_color_content(NUM2INT(color), &r, &g, &b) == ERR)
@@ -1451,7 +1457,7 @@ static VALUE
 curses_pair_content(VALUE obj, VALUE pair)
 {
     curses_stdscr();
-#ifdef HAVE_EXTENDED_PAIR_CONTENT
+#if SUPPORT_EXTENDED_COLORS
     {
 	int f, b;
 	if (extended_pair_content(NUM2INT(pair), &f, &b) == ERR)
@@ -1501,14 +1507,12 @@ curses_pair_number(VALUE obj, VALUE attrs)
  * Document-method: Curses.support_extended_colors?
  *
  * Returns +true+ if the ncurses library was compiled with extended color
- * support (i.e., init_extended_pair, init_extended_color, etc. are available),
- * +false+ otherwise.
+ * support, +false+ otherwise.
  */
 static VALUE
 curses_support_extended_colors(VALUE obj)
 {
-#if defined(HAVE_INIT_EXTENDED_PAIR) && defined(HAVE_INIT_EXTENDED_COLOR) && \
-    defined(HAVE_EXTENDED_COLOR_CONTENT) && defined(HAVE_EXTENDED_PAIR_CONTENT)
+#if SUPPORT_EXTENDED_COLORS
     return Qtrue;
 #else
     return Qfalse;
