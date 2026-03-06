@@ -1410,13 +1410,15 @@ curses_color_content(VALUE obj, VALUE color)
 #ifdef HAVE_EXTENDED_COLOR_CONTENT
     {
 	int r, g, b;
-	extended_color_content(NUM2INT(color), &r, &g, &b);
+	if (extended_color_content(NUM2INT(color), &r, &g, &b) == ERR)
+	    return Qnil;
 	return rb_ary_new3(3, INT2FIX(r), INT2FIX(g), INT2FIX(b));
     }
 #else
     {
 	short r, g, b;
-	color_content(NUM2INT(color), &r, &g, &b);
+	if (color_content(NUM2INT(color), &r, &g, &b) == ERR)
+	    return Qnil;
 	return rb_ary_new3(3, INT2FIX(r), INT2FIX(g), INT2FIX(b));
     }
 #endif
@@ -1452,13 +1454,15 @@ curses_pair_content(VALUE obj, VALUE pair)
 #ifdef HAVE_EXTENDED_PAIR_CONTENT
     {
 	int f, b;
-	extended_pair_content(NUM2INT(pair), &f, &b);
+	if (extended_pair_content(NUM2INT(pair), &f, &b) == ERR)
+	    return Qnil;
 	return rb_ary_new3(2, INT2FIX(f), INT2FIX(b));
     }
 #else
     {
 	short f, b;
-	pair_content(NUM2INT(pair), &f, &b);
+	if (pair_content(NUM2INT(pair), &f, &b) == ERR)
+	    return Qnil;
 	return rb_ary_new3(2, INT2FIX(f), INT2FIX(b));
     }
 #endif
@@ -1520,6 +1524,7 @@ curses_support_extended_colors(VALUE obj)
 static VALUE
 curses_reset_color_pairs(VALUE obj)
 {
+    curses_stdscr();
     reset_color_pairs();
     return Qnil;
 }
@@ -2792,7 +2797,16 @@ window_color_set(VALUE obj, VALUE col)
     struct windata *winp;
 
     GetWINDOW(obj, winp);
-#ifdef HAVE_WATTR_SET
+#if defined(HAVE_WATTR_SET) && defined(HAVE_WATTR_GET)
+    /* Use wattr_set to support pair numbers > 255; preserve existing attrs. */
+    {
+	attr_t attrs;
+	NCURSES_PAIRS_T current_pair;
+	if (wattr_get(winp->window, &attrs, &current_pair, NULL) == ERR)
+	    return Qfalse;
+	return (wattr_set(winp->window, attrs, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
+    }
+#elif defined(HAVE_WATTR_SET)
     return (wattr_set(winp->window, 0, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
 #else
     return (wcolor_set(winp->window, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;

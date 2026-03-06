@@ -121,7 +121,7 @@ if header_library
               newpad unget_wch get_wch wget_wch PDC_get_key_modifiers
               chgat wchgat newterm
               init_extended_color init_extended_pair extended_color_content
-              extended_pair_content reset_color_pairs wattr_set)
+              extended_pair_content reset_color_pairs wattr_set wattr_get)
     have_func(f) || (have_macro(f, curses) && $defs.push(format("-DHAVE_%s", f.upcase)))
   end
   convertible_int('chtype', [["#undef MOUSE_MOVED\n"]]+curses) or abort

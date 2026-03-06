@@ -20,7 +20,8 @@ begin
     addstr extended ? " (extended).\n" : ".\n"
 
     (extended ? [512, color_pairs].min : colors).times { |i|
-      Curses.init_pair(i, i%256, i>=256 ? 8 : 0)
+      next if i == 0
+      Curses.init_pair(i, i % colors, (i / colors) % colors)
       if extended
         # color_pair() encodes into chtype and can't handle pairs > 255;
         # use color_set on stdscr instead, which calls wattr_set internally.
