@@ -2783,7 +2783,7 @@ window_setscrreg(VALUE obj, VALUE top, VALUE bottom)
 #endif
 }
 
-#if defined(USE_COLOR) && (defined(HAVE_WCOLOR_SET) || defined(HAVE_WATTR_SET))
+#if defined(USE_COLOR) && ((defined(HAVE_WATTR_SET) && defined(HAVE_WATTR_GET)) || defined(HAVE_WCOLOR_SET))
 /*
  * Document-method: Curses::Window.color_set
  * call-seq: color_set(col)
@@ -2810,13 +2810,11 @@ window_color_set(VALUE obj, VALUE col)
 	    return Qfalse;
 	return (wattr_set(winp->window, attrs, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
     }
-#elif defined(HAVE_WATTR_SET)
-    return (wattr_set(winp->window, 0, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
 #else
     return (wcolor_set(winp->window, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
 #endif
 }
-#endif /* defined(USE_COLOR) && (defined(HAVE_WCOLOR_SET) || defined(HAVE_WATTR_SET)) */
+#endif /* defined(USE_COLOR) && ((defined(HAVE_WATTR_SET) && defined(HAVE_WATTR_GET)) || defined(HAVE_WCOLOR_SET)) */
 
 /*
  * Document-method: Curses::Window.scroll
@@ -5344,9 +5342,9 @@ Init_curses(void)
     rb_define_method(cWindow, "move", window_move, 2);
     rb_define_method(cWindow, "move_relative", window_move_relative, 2);
     rb_define_method(cWindow, "setpos", window_setpos, 2);
-#if defined(USE_COLOR) && (defined(HAVE_WCOLOR_SET) || defined(HAVE_WATTR_SET))
+#if defined(USE_COLOR) && ((defined(HAVE_WATTR_SET) && defined(HAVE_WATTR_GET)) || defined(HAVE_WCOLOR_SET))
     rb_define_method(cWindow, "color_set", window_color_set, 1);
-#endif /* USE_COLOR && (HAVE_WCOLOR_SET || HAVE_WATTR_SET) */
+#endif
     rb_define_method(cWindow, "cury", window_cury, 0);
     rb_define_method(cWindow, "curx", window_curx, 0);
     rb_define_method(cWindow, "maxy", window_maxy, 0);
