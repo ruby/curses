@@ -53,7 +53,7 @@ Type the following command, and see `[rdoc]` of curses:
 
 ## Limitations
 
-* curses.gem doesn't support more than 256 color pairs.  See https://reversed.top/2019-02-05/more-than-256-curses-color-pairs/ for details.
+* On ncurses 6+ compiled with extended color support, more than 256 color pairs are supported transparently via the extended colors API (`init_extended_pair`, etc.). Use `Curses.support_extended_colors?` to check at runtime.
 
 ## Developers
 

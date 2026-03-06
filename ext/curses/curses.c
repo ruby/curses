@@ -1321,7 +1321,11 @@ curses_init_pair(VALUE obj, VALUE pair, VALUE f, VALUE b)
 {
     /* may have to raise exception on ERR */
     curses_stdscr();
+#ifdef HAVE_INIT_EXTENDED_PAIR
+    return (init_extended_pair(NUM2INT(pair), NUM2INT(f), NUM2INT(b)) == OK) ? Qtrue : Qfalse;
+#else
     return (init_pair(NUM2INT(pair),NUM2INT(f),NUM2INT(b)) == OK) ? Qtrue : Qfalse;
+#endif
 }
 
 /*
@@ -1345,8 +1349,13 @@ curses_init_color(VALUE obj, VALUE color, VALUE r, VALUE g, VALUE b)
 {
     /* may have to raise exception on ERR */
     curses_stdscr();
+#ifdef HAVE_INIT_EXTENDED_COLOR
+    return (init_extended_color(NUM2INT(color), NUM2INT(r),
+				NUM2INT(g), NUM2INT(b)) == OK) ? Qtrue : Qfalse;
+#else
     return (init_color(NUM2INT(color),NUM2INT(r),
 		       NUM2INT(g),NUM2INT(b)) == OK) ? Qtrue : Qfalse;
+#endif
 }
 
 /*
@@ -1397,11 +1406,20 @@ curses_colors(VALUE obj)
 static VALUE
 curses_color_content(VALUE obj, VALUE color)
 {
-    short r,g,b;
-
     curses_stdscr();
-    color_content(NUM2INT(color),&r,&g,&b);
-    return rb_ary_new3(3,INT2FIX(r),INT2FIX(g),INT2FIX(b));
+#ifdef HAVE_EXTENDED_COLOR_CONTENT
+    {
+	int r, g, b;
+	extended_color_content(NUM2INT(color), &r, &g, &b);
+	return rb_ary_new3(3, INT2FIX(r), INT2FIX(g), INT2FIX(b));
+    }
+#else
+    {
+	short r, g, b;
+	color_content(NUM2INT(color), &r, &g, &b);
+	return rb_ary_new3(3, INT2FIX(r), INT2FIX(g), INT2FIX(b));
+    }
+#endif
 }
 
 
@@ -1430,11 +1448,20 @@ curses_color_pairs(VALUE obj)
 static VALUE
 curses_pair_content(VALUE obj, VALUE pair)
 {
-    short f,b;
-
     curses_stdscr();
-    pair_content(NUM2INT(pair),&f,&b);
-    return rb_ary_new3(2,INT2FIX(f),INT2FIX(b));
+#ifdef HAVE_EXTENDED_PAIR_CONTENT
+    {
+	int f, b;
+	extended_pair_content(NUM2INT(pair), &f, &b);
+	return rb_ary_new3(2, INT2FIX(f), INT2FIX(b));
+    }
+#else
+    {
+	short f, b;
+	pair_content(NUM2INT(pair), &f, &b);
+	return rb_ary_new3(2, INT2FIX(f), INT2FIX(b));
+    }
+#endif
 }
 
 /*
@@ -1465,6 +1492,40 @@ curses_pair_number(VALUE obj, VALUE attrs)
     curses_stdscr();
     return INT2FIX(PAIR_NUMBER(NUM2CHTYPE(attrs)));
 }
+
+/*
+ * Document-method: Curses.support_extended_colors?
+ *
+ * Returns +true+ if the ncurses library was compiled with extended color
+ * support (i.e., init_extended_pair, init_extended_color, etc. are available),
+ * +false+ otherwise.
+ */
+static VALUE
+curses_support_extended_colors(VALUE obj)
+{
+#if defined(HAVE_INIT_EXTENDED_PAIR) && defined(HAVE_INIT_EXTENDED_COLOR) && \
+    defined(HAVE_EXTENDED_COLOR_CONTENT) && defined(HAVE_EXTENDED_PAIR_CONTENT)
+    return Qtrue;
+#else
+    return Qfalse;
+#endif
+}
+
+/*
+ * Document-method: Curses.reset_color_pairs
+ *
+ * Resets all color pairs to undefined. Requires ncurses 6.1+.
+ */
+#ifdef HAVE_RESET_COLOR_PAIRS
+static VALUE
+curses_reset_color_pairs(VALUE obj)
+{
+    reset_color_pairs();
+    return Qnil;
+}
+#else
+#define curses_reset_color_pairs rb_f_notimplement
+#endif
 #endif /* USE_COLOR */
 
 #ifdef USE_MOUSE
@@ -2717,7 +2778,7 @@ window_setscrreg(VALUE obj, VALUE top, VALUE bottom)
 #endif
 }
 
-#if defined(USE_COLOR) && defined(HAVE_WCOLOR_SET)
+#if defined(USE_COLOR) && (defined(HAVE_WCOLOR_SET) || defined(HAVE_WATTR_SET))
 /*
  * Document-method: Curses::Window.color_set
  * call-seq: color_set(col)
@@ -2729,13 +2790,15 @@ static VALUE
 window_color_set(VALUE obj, VALUE col)
 {
     struct windata *winp;
-    int res;
 
     GetWINDOW(obj, winp);
-    res = wcolor_set(winp->window, NUM2INT(col), NULL);
-    return (res == OK) ? Qtrue : Qfalse;
+#ifdef HAVE_WATTR_SET
+    return (wattr_set(winp->window, 0, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
+#else
+    return (wcolor_set(winp->window, NUM2INT(col), NULL) == OK) ? Qtrue : Qfalse;
+#endif
 }
-#endif /* defined(USE_COLOR) && defined(HAVE_WCOLOR_SET) */
+#endif /* defined(USE_COLOR) && (defined(HAVE_WCOLOR_SET) || defined(HAVE_WATTR_SET)) */
 
 /*
  * Document-method: Curses::Window.scroll
@@ -5071,6 +5134,8 @@ Init_curses(void)
     rb_define_module_function(mCurses, "pair_content", curses_pair_content, 1);
     rb_define_module_function(mCurses, "color_pair", curses_color_pair, 1);
     rb_define_module_function(mCurses, "pair_number", curses_pair_number, 1);
+    rb_define_module_function(mCurses, "support_extended_colors?", curses_support_extended_colors, 0);
+    rb_define_module_function(mCurses, "reset_color_pairs", curses_reset_color_pairs, 0);
 #endif /* USE_COLOR */
 #ifdef USE_MOUSE
     rb_define_module_function(mCurses, "getmouse", curses_getmouse, 0);
@@ -5203,9 +5268,9 @@ Init_curses(void)
     rb_define_method(cWindow, "move", window_move, 2);
     rb_define_method(cWindow, "move_relative", window_move_relative, 2);
     rb_define_method(cWindow, "setpos", window_setpos, 2);
-#if defined(USE_COLOR) && defined(HAVE_WCOLOR_SET)
+#if defined(USE_COLOR) && (defined(HAVE_WCOLOR_SET) || defined(HAVE_WATTR_SET))
     rb_define_method(cWindow, "color_set", window_color_set, 1);
-#endif /* USE_COLOR && HAVE_WCOLOR_SET */
+#endif /* USE_COLOR && (HAVE_WCOLOR_SET || HAVE_WATTR_SET) */
     rb_define_method(cWindow, "cury", window_cury, 0);
     rb_define_method(cWindow, "curx", window_curx, 0);
     rb_define_method(cWindow, "maxy", window_maxy, 0);
