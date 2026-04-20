@@ -34,7 +34,7 @@ jobs:
         # Outputs to the './_site' directory by default
         run: rake rdoc
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
 
   deploy:
     environment:
