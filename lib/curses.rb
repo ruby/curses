@@ -1,4 +1,4 @@
-pdcurses_dll = File.expand_path("../vendor/PDCurses/pdcurses.dll", __dir__)
+pdcurses_dll = File.expand_path("../vendor/PDCursesMod/pdcurses.dll", __dir__)
 if File.exist?(pdcurses_dll)
   path = ENV["PATH"]
   dir = File.dirname(pdcurses_dll)

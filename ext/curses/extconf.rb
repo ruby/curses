@@ -55,7 +55,7 @@ $use_bundled_pdcurses = !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
 if $use_bundled_pdcurses
   $pdcurses_wide_default = true
   $curses_version_default = "function"
-  pdcurses_dir = File.expand_path("../../vendor/PDCurses", __dir__)
+  pdcurses_dir = File.expand_path("../../vendor/PDCursesMod", __dir__)
   $idefault = $ldefault = pdcurses_dir
   wincon_dir = File.expand_path("wincon", pdcurses_dir)
   old_dir = Dir.pwd
