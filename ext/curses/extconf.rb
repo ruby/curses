@@ -76,6 +76,9 @@ if $use_bundled_pdcurses
   end
   FileUtils.cp(File.expand_path("curses.h", pdcurses_dir),
                File.expand_path("pdcurses.h", pdcurses_dir))
+  # PDCursesMod calls PlaySound() in PDC_beep(), so the static library
+  # needs winmm at link time
+  have_library("winmm") if $mingw
   $library_candidates = [
     ["pdcurses.h", ["pdcurses"]]
   ]
