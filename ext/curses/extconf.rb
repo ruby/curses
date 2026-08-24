@@ -68,7 +68,7 @@ if $use_bundled_pdcurses
       $pdcurses_dll_default = true
     else
       w64 = $x64 ? "_w64=1" : ""
-      exec_command "make -f Makefile.mng clean libs #{w64} WIDE=Y DLL=N CC=\"gcc -std=gnu17\""
+      exec_command "make -f Makefile clean libs #{w64} WIDE=Y DLL=N CC=\"gcc -std=gnu17\""
       FileUtils.cp("pdcurses.a", File.expand_path("libpdcurses.a", pdcurses_dir))
     end
   ensure
