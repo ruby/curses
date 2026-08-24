@@ -68,9 +68,9 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 curses is released under the Ruby and 2-clause BSD licenses.  See COPYING for
 details.
 
-It includes a forked version of PDCurses, which is in the public domain:
+It includes PDCursesMod, which is in the public domain:
 
-  https://github.com/Bill-Gray/PDCurses
+  https://github.com/Bill-Gray/PDCursesMod
 
 The version for Win32 console mode in the wincon subdirectory is used.
 

@@ -55,7 +55,7 @@ $use_bundled_pdcurses = !$use_system_libs && /mingw|mswin/ =~ RUBY_PLATFORM
 if $use_bundled_pdcurses
   $pdcurses_wide_default = true
   $curses_version_default = "function"
-  pdcurses_dir = File.expand_path("../../vendor/PDCurses", __dir__)
+  pdcurses_dir = File.expand_path("../../vendor/PDCursesMod", __dir__)
   $idefault = $ldefault = pdcurses_dir
   wincon_dir = File.expand_path("wincon", pdcurses_dir)
   old_dir = Dir.pwd
@@ -68,7 +68,7 @@ if $use_bundled_pdcurses
       $pdcurses_dll_default = true
     else
       w64 = $x64 ? "_w64=1" : ""
-      exec_command "make -f Makefile.mng clean libs #{w64} WIDE=Y DLL=N CC=\"gcc -std=gnu17\""
+      exec_command "make -f Makefile clean libs #{w64} WIDE=Y DLL=N CC=\"gcc -std=gnu17\""
       FileUtils.cp("pdcurses.a", File.expand_path("libpdcurses.a", pdcurses_dir))
     end
   ensure
@@ -76,6 +76,9 @@ if $use_bundled_pdcurses
   end
   FileUtils.cp(File.expand_path("curses.h", pdcurses_dir),
                File.expand_path("pdcurses.h", pdcurses_dir))
+  # PDCursesMod calls PlaySound() in PDC_beep(), so the static library
+  # needs winmm at link time
+  have_library("winmm") if $mingw
   $library_candidates = [
     ["pdcurses.h", ["pdcurses"]]
   ]
