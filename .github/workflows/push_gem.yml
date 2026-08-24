@@ -38,6 +38,11 @@ jobs:
           bundler-cache: true
           ruby-version: ruby
 
+      # Prevent `git fetch --tags` in release-gem from fetching submodule
+      # commits unreachable in the current submodule remote
+      - name: Disable submodule fetch recursion
+        run: git config fetch.recurseSubmodules false
+
       # Release
       - name: Publish to RubyGems
         uses: rubygems/release-gem@v1
